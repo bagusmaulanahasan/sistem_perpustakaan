@@ -1,0 +1,12 @@
+<div class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
+    <form action="/admin/categories" method="POST">
+        <div class="mb-4">
+            <label for="name" class="block text-sm font-medium text-gray-700">Nama Kategori</label>
+            <input type="text" name="name" id="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div class="flex items-center space-x-4">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Simpan</button>
+            <a href="/admin/categories" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Batal</a>
+        </div>
+    </form>
+</div>

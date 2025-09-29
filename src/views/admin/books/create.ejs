@@ -1,0 +1,9 @@
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <form action="/admin/books" method="POST">
+        <%- include('_form', { book: null }) %>
+        <div class="mt-6 flex items-center space-x-4">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Simpan Buku</button>
+            <a href="/admin/books" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Batal</a>
+        </div>
+    </form>
+</div>

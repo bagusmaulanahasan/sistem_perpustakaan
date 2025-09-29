@@ -1,0 +1,35 @@
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Buku yang Sedang Dipinjam</h2>
+
+    <% if (books.length === 0) { %>
+        <div class="text-center py-10">
+            <p class="text-gray-500">Anda tidak sedang meminjam buku.</p>
+            <a href="/katalog" class="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                Pinjam Buku Sekarang
+            </a>
+        </div>
+    <% } else { %>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="py-2 px-4 text-left">Judul Buku</th>
+                        <th class="py-2 px-4 text-left">Penulis</th>
+                        <th class="py-2 px-4 text-left">Tanggal Pinjam</th>
+                        <th class="py-2 px-4 text-left font-semibold text-red-600">Batas Pengembalian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% books.forEach(book => { %>
+                        <tr class="border-b">
+                            <td class="py-2 px-4 font-medium"><%= book.title %></td>
+                            <td class="py-2 px-4 text-gray-600"><%= book.author %></td>
+                            <td class="py-2 px-4"><%= new Date(book.borrow_date).toLocaleDateString('id-ID') %></td>
+                            <td class="py-2 px-4 font-medium text-red-600"><%= new Date(book.due_date).toLocaleDateString('id-ID') %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</div>

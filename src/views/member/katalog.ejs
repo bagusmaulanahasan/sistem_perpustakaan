@@ -1,0 +1,50 @@
+<div class="flex">
+    <aside class="w-1/5 pr-8">
+        <h3 class="text-lg font-semibold mb-3">Kategori</h3>
+        <ul class="space-y-2">
+            <li>
+                <a href="/katalog" class="block text-gray-700 hover:text-indigo-600 <%= !selectedCategory ? 'font-bold text-indigo-600' : '' %>">
+                    Semua Kategori
+                </a>
+            </li>
+            <% categories.forEach(category => { %>
+                <li>
+                    <a href="/katalog?kategori=<%= category.id %>" class="block text-gray-700 hover:text-indigo-600 <%= selectedCategory == category.id ? 'font-bold text-indigo-600' : '' %>">
+                        <%= category.name %>
+                    </a>
+                </li>
+            <% }) %>
+        </ul>
+    </aside>
+
+    <main class="w-4/5">
+        <% if (books.length === 0) { %>
+            <div class="text-center py-10 bg-white rounded-lg shadow-md">
+                <p class="text-gray-500">Tidak ada buku yang ditemukan.</p>
+            </div>
+        <% } else { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <% books.forEach(book => { %>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                        <img src="<%= book.cover_image_url || '/images/default.jpg' %>" alt="Cover <%= book.title %>" class="w-full h-56 object-cover">
+                        <div class="p-4 flex-1 flex flex-col">
+                            <h4 class="text-md font-semibold text-gray-800 truncate" title="<%= book.title %>"><%= book.title %></h4>
+                            <p class="text-sm text-gray-600 mb-2"><%= book.author %></p>
+                            
+                            <div class="mt-auto pt-2">
+                                <% if (book.stock > 0) { %>
+                                    <span class="text-xs font-medium text-green-800 bg-green-100 px-2.5 py-0.5 rounded-full">Stok: <%= book.stock %></span>
+                                <% } else { %>
+                                    <span class="text-xs font-medium text-red-800 bg-red-100 px-2.5 py-0.5 rounded-full">Stok Habis</span>
+                                <% } %>
+                                <a href="/buku/<%= book.id %>" class="mt-3 block w-full text-center bg-indigo-600 text-white text-sm py-2 rounded-md hover:bg-indigo-700">
+                                    Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </main>
+</div>

@@ -1,0 +1,35 @@
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Wishlist Saya</h2>
+
+    <% if (books.length === 0) { %>
+        <div class="text-center py-10">
+            <p class="text-gray-500">Wishlist Anda masih kosong.</p>
+            <a href="/katalog" class="mt-4 inline-block px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                Cari Buku
+            </a>
+        </div>
+    <% } else { %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <% books.forEach(book => { %>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                    <img src="<%= book.cover_image_url || '/images/default.jpg' %>" alt="Cover <%= book.title %>" class="w-full h-56 object-cover">
+                    <div class="p-4 flex-1 flex flex-col">
+                        <h4 class="text-md font-semibold text-gray-800 truncate" title="<%= book.title %>"><%= book.title %></h4>
+                        <p class="text-sm text-gray-600 mb-2"><%= book.author %></p>
+                        
+                        <div class="mt-auto pt-2 space-y-2">
+                             <a href="/buku/<%= book.id %>" class="block w-full text-center bg-indigo-600 text-white text-sm py-2 rounded-md hover:bg-indigo-700">
+                                Lihat Detail
+                            </a>
+                            <form action="/wishlist/hapus/<%= book.id %>" method="POST">
+                                <button type="submit" class="w-full bg-red-100 text-red-700 text-sm py-2 rounded-md hover:bg-red-200">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
