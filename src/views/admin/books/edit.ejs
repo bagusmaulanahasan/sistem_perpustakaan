@@ -1,5 +1,10 @@
 <div class="bg-white p-6 rounded-lg shadow-md">
-    <form action="/admin/books/update/<%= book.id %>" method="POST">
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="p-4 mb-4 text-sm text-red-800 bg-red-100 rounded-lg" role="alert">
+            <span class="font-medium">Terjadi Kesalahan!</span> <%= error %>
+        </div>
+    <% } %>
+    <form action="/admin/books/update/<%= book.id %>" method="POST" enctype="multipart/form-data">
         <%- include('_form', { book: book }) %>
         <div class="mt-6 flex items-center space-x-4">
             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Update Buku</button>

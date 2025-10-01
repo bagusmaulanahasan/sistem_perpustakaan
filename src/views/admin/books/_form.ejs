@@ -36,6 +36,42 @@
     </div>
 </div>
 
+<div class="mt-4 border-t pt-6">
+    <label for="cover_image" class="block text-sm font-medium text-gray-700">Sampul Buku</label>
+    <input type="file" name="cover_image" id="cover_image" class="mt-1 block w-full text-sm text-gray-500
+        file:mr-4 file:py-2 file:px-4
+        file:rounded-full file:border-0
+        file:text-sm file:font-semibold
+        file:bg-indigo-50 file:text-indigo-700
+        hover:file:bg-indigo-100"
+    >
+    <div class="mt-4">
+        <img id="imagePreview" src="<%= book && book.cover_image_url ? book.cover_image_url : '#' %>" alt="Preview Gambar" class="w-32 h-auto <%= book && book.cover_image_url ? '' : 'hidden' %> bg-gray-100 rounded shadow-sm">
+    </div>
+</div>
+
+<script>
+    const coverImageInput = document.getElementById('cover_image');
+    const imagePreview = document.getElementById('imagePreview');
+
+    coverImageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            imagePreview.classList.remove('hidden'); // Tampilkan elemen img
+            
+            reader.addEventListener('load', function() {
+                imagePreview.setAttribute('src', this.result);
+            });
+            
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.classList.add('hidden'); // Sembunyikan jika tidak ada file dipilih
+            imagePreview.setAttribute('src', '#');
+        }
+    });
+</script>
+
 <style>
     .input-field {
         margin-top: 0.25rem;

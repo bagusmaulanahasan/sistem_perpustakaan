@@ -68,7 +68,7 @@ const Book = {
             [title, author, publisher, publication_year, stock, category_id, cover_image_url, id]
         );
         return result.affectedRows;
-    },
+},
 
     // Menghapus buku
     remove: async (id) => {

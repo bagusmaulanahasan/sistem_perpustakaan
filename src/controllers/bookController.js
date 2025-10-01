@@ -1,5 +1,9 @@
+const fs = require('fs');
+const path = require('path'); // <-- TAMBAHKAN BARIS INI
 const Book = require('../models/bookModel');
 const Category = require('../models/categoryModel'); // Kita butuh model kategori
+const multer = require('multer'); // Impor multer untuk cek error
+const upload = require('../middleware/uploadMiddleware'); // <-- TAMBAHKAN BARIS INI
 
 // Menampilkan daftar semua buku
 exports.listBooks = async (req, res) => {
@@ -31,19 +35,54 @@ exports.getCreatePage = async (req, res) => {
     }
 };
 
-// Memproses penambahan buku baru
+
+// GANTI FUNGSI LAMA DENGAN VERSI FINAL INI
 exports.postCreateBook = async (req, res) => {
+    // Middleware Multer sudah berjalan di Rute, jadi req.body dan req.file sudah tersedia di sini.
+
+    // 1. Ambil data dari request body
+    const bookData = { ...req.body };
+    
+    // 2. Lakukan validasi
+    if (!bookData.title || !bookData.author) {
+        const categories = await Category.findAll();
+        return res.render('admin/books/create', {
+            title: 'Tambah Buku Baru',
+            categories,
+            book: bookData,
+            error: 'Judul dan Penulis tidak boleh kosong!'
+        });
+    }
+
+    if (bookData.category_id === '') {
+        bookData.category_id = null;
+    }
+
+    // 3. Tentukan path gambar
+    if (req.file) {
+        // Hapus 'public' dari path agar bisa diakses dari browser dengan benar
+        bookData.cover_image_url = req.file.path.replace('public', '');
+    } else {
+        // Gunakan gambar default jika tidak ada file yang di-upload
+        bookData.cover_image_url = '/uploads/covers/default.jpg';
+    }
+
+    // 4. Simpan ke database
     try {
-        // Untuk upload gambar, diperlukan middleware tambahan seperti 'multer'.
-        // Untuk saat ini, kita simpan path gambar sebagai teks biasa.
-        const bookData = { ...req.body, cover_image_url: '/images/default.jpg' };
         await Book.create(bookData);
         res.redirect('/admin/books');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Gagal menyimpan buku');
+    } catch (dbError) {
+        console.error('DATABASE ERROR:', dbError);
+        const categories = await Category.findAll();
+        res.render('admin/books/create', {
+            title: 'Tambah Buku Baru',
+            categories,
+            book: bookData,
+            error: 'Gagal menyimpan buku ke database. Cek terminal untuk detail.'
+        });
     }
 };
+
 
 // Menampilkan form untuk mengedit buku
 exports.getEditPage = async (req, res) => {
@@ -65,22 +104,59 @@ exports.getEditPage = async (req, res) => {
     }
 };
 
-// Memproses update buku
+// FUNGSI UNTUK UPDATE BUKU
 exports.postUpdateBook = async (req, res) => {
-    try {
-        const { id } = req.params;
-        // Asumsi path gambar tidak diubah jika tidak ada file baru yang diupload
-        const bookData = { ...req.body };
-        const existingBook = await Book.findById(id);
-        bookData.cover_image_url = existingBook.cover_image_url; // Ganti dengan logika upload jika ada
+    // Middleware Multer sudah berjalan di Rute,
+    // jadi req.body dan req.file sudah terisi penuh di sini.
+    const { id } = req.params;
 
-        await Book.update(id, bookData);
+    try {
+        const existingBook = await Book.findById(id);
+        if (!existingBook) {
+            return res.status(404).send('Buku tidak ditemukan');
+        }
+
+        // Siapkan data final untuk di-update, dimulai dengan data baru dari form
+        const finalBookData = {
+            title: req.body.title,
+            author: req.body.author,
+            publisher: req.body.publisher,
+            publication_year: req.body.publication_year,
+            stock: req.body.stock,
+            category_id: req.body.category_id === '' ? null : req.body.category_id,
+            cover_image_url: existingBook.cover_image_url // Gunakan gambar lama sebagai default
+        };
+
+        // Jika ada file BARU yang di-upload, timpa URL gambar dan hapus file lama
+        if (req.file) {
+            finalBookData.cover_image_url = req.file.path.replace('public', '');
+            
+            // Hapus gambar lama (jika ada dan bukan gambar default)
+            if (existingBook.cover_image_url && existingBook.cover_image_url !== '/uploads/covers/default.jpg') {
+                const oldImagePath = path.join(__dirname, '../../public', existingBook.cover_image_url);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+        }
+
+        // Update data di database
+        await Book.update(id, finalBookData);
         res.redirect('/admin/books');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Gagal mengupdate buku');
+
+    } catch (dbError) {
+        console.error('DATABASE ERROR:', dbError);
+        // Jika ada error saat update, render kembali halaman edit dengan pesan
+        const categories = await Category.findAll();
+        res.render('admin/books/edit', {
+            title: 'Edit Buku',
+            categories: categories,
+            book: req.body, // Kirim kembali data yang baru diinput user
+            error: 'Gagal mengupdate buku. Cek terminal untuk detail.'
+        });
     }
 };
+
 
 // Memproses penghapusan buku
 exports.postDeleteBook = async (req, res) => {

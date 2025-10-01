@@ -9,6 +9,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes'); // <-- Tambahkan ini
 const bookRoutes = require('./src/routes/bookRoutes'); // <-- Tambahkan ini
 const memberRoutes = require('./src/routes/memberRoutes'); // <-- Tambahkan ini
+const adminRoutes = require('./src/routes/adminRoutes'); // <-- Impor rute admin
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -41,9 +42,10 @@ app.use((req, res, next) => {
 
 // Menggunakan Routes
 app.use('/', authRoutes);
-app.use('/admin/categories', categoryRoutes); // <-- Tambahkan ini
-app.use('/admin/books', bookRoutes); // <-- Tambahkan ini
+// app.use('/admin/categories', categoryRoutes); // <-- Tambahkan ini
+// app.use('/admin/books', bookRoutes); // <-- Tambahkan ini
 app.use('/', memberRoutes); // <-- Tambahkan ini
+app.use('/admin', adminRoutes); // <-- Gunakan rute admin dengan awalan /admin
 
 // Rute dasar
 app.get('/', (req, res) => {
