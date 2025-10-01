@@ -1,17 +1,16 @@
 const fs = require('fs');
-const path = require('path'); // <-- TAMBAHKAN BARIS INI
+const path = require('path');
+const multer = require('multer');
 const Book = require('../models/bookModel');
-const Category = require('../models/categoryModel'); // Kita butuh model kategori
-const multer = require('multer'); // Impor multer untuk cek error
-const upload = require('../middleware/uploadMiddleware'); // <-- TAMBAHKAN BARIS INI
+const Category = require('../models/categoryModel');
+const upload = require('../middleware/uploadMiddleware');
 
-// Menampilkan daftar semua buku
+// Menampilkan daftar semua buku (versi sederhana tanpa pagination)
 exports.listBooks = async (req, res) => {
     try {
         const books = await Book.findAll();
         res.render('admin/books/index', {
             books,
-            user: req.session.user,
             title: 'Manajemen Buku'
         });
     } catch (error) {
@@ -23,11 +22,12 @@ exports.listBooks = async (req, res) => {
 // Menampilkan form untuk menambah buku baru
 exports.getCreatePage = async (req, res) => {
     try {
-        const categories = await Category.findAll(); // Ambil semua kategori untuk dropdown
+        const categories = await Category.findAll();
         res.render('admin/books/create', {
             categories,
-            user: req.session.user,
-            title: 'Tambah Buku Baru'
+            title: 'Tambah Buku Baru',
+            book: null, // Kirim book sebagai null untuk form create
+            error: null
         });
     } catch (error) {
         console.error(error);
@@ -35,68 +35,55 @@ exports.getCreatePage = async (req, res) => {
     }
 };
 
-
-// GANTI FUNGSI LAMA DENGAN VERSI FINAL INI
+// Memproses penambahan buku baru
+// GANTI FUNGSI postCreateBook DENGAN INI
 exports.postCreateBook = async (req, res) => {
-    // Middleware Multer sudah berjalan di Rute, jadi req.body dan req.file sudah tersedia di sini.
-
-    // 1. Ambil data dari request body
-    const bookData = { ...req.body };
-    
-    // 2. Lakukan validasi
-    if (!bookData.title || !bookData.author) {
-        const categories = await Category.findAll();
-        return res.render('admin/books/create', {
-            title: 'Tambah Buku Baru',
-            categories,
-            book: bookData,
-            error: 'Judul dan Penulis tidak boleh kosong!'
-        });
-    }
-
-    if (bookData.category_id === '') {
-        bookData.category_id = null;
-    }
-
-    // 3. Tentukan path gambar
-    if (req.file) {
-        // Hapus 'public' dari path agar bisa diakses dari browser dengan benar
-        bookData.cover_image_url = req.file.path.replace('public', '');
-    } else {
-        // Gunakan gambar default jika tidak ada file yang di-upload
-        bookData.cover_image_url = '/uploads/covers/default.jpg';
-    }
-
-    // 4. Simpan ke database
+    // Middleware upload sudah berjalan di rute, jadi req.body dan req.file sudah tersedia.
     try {
+        const bookData = { ...req.body };
+
+        if (!bookData.title || !bookData.author) {
+            const categories = await Category.findAll();
+            return res.render('admin/books/create', {
+                title: 'Tambah Buku Baru', categories, book: bookData,
+                error: 'Judul dan Penulis tidak boleh kosong!'
+            });
+        }
+        if (bookData.category_id === '') {
+            bookData.category_id = null;
+        }
+
+        if (req.file) {
+            bookData.cover_image_url = req.file.path.replace('public', '');
+        } else {
+            bookData.cover_image_url = '/uploads/covers/default.jpg';
+        }
+
         await Book.create(bookData);
         res.redirect('/admin/books');
     } catch (dbError) {
-        console.error('DATABASE ERROR:', dbError);
+        console.error('DATABASE ERROR (Create):', dbError);
         const categories = await Category.findAll();
         res.render('admin/books/create', {
-            title: 'Tambah Buku Baru',
-            categories,
-            book: bookData,
-            error: 'Gagal menyimpan buku ke database. Cek terminal untuk detail.'
+            title: 'Tambah Buku Baru', categories, book: req.body,
+            error: 'Gagal menyimpan buku. Cek terminal untuk detail.'
         });
     }
 };
 
-
-// Menampilkan form untuk mengedit buku
+// Menampilkan form untuk mengedit buku (INI FUNGSI YANG KEMUNGKINAN BESAR HILANG/RUSAK)
 exports.getEditPage = async (req, res) => {
     try {
         const book = await Book.findById(req.params.id);
-        const categories = await Category.findAll(); // Tetap butuh kategori untuk dropdown
+        const categories = await Category.findAll();
         if (!book) {
             return res.status(404).send('Buku tidak ditemukan');
         }
         res.render('admin/books/edit', {
-            book,
+            book, // Mengirim objek 'book' ke view
             categories,
-            user: req.session.user,
-            title: 'Edit Buku'
+            title: 'Edit Buku',
+            error: null
         });
     } catch (error) {
         console.error(error);
@@ -104,10 +91,9 @@ exports.getEditPage = async (req, res) => {
     }
 };
 
-// FUNGSI UNTUK UPDATE BUKU
+// Memproses update buku
 exports.postUpdateBook = async (req, res) => {
-    // Middleware Multer sudah berjalan di Rute,
-    // jadi req.body dan req.file sudah terisi penuh di sini.
+    // Middleware upload sudah berjalan di rute, jadi req.body dan req.file sudah tersedia.
     const { id } = req.params;
 
     try {
@@ -116,7 +102,6 @@ exports.postUpdateBook = async (req, res) => {
             return res.status(404).send('Buku tidak ditemukan');
         }
 
-        // Siapkan data final untuk di-update, dimulai dengan data baru dari form
         const finalBookData = {
             title: req.body.title,
             author: req.body.author,
@@ -124,14 +109,11 @@ exports.postUpdateBook = async (req, res) => {
             publication_year: req.body.publication_year,
             stock: req.body.stock,
             category_id: req.body.category_id === '' ? null : req.body.category_id,
-            cover_image_url: existingBook.cover_image_url // Gunakan gambar lama sebagai default
+            cover_image_url: existingBook.cover_image_url
         };
 
-        // Jika ada file BARU yang di-upload, timpa URL gambar dan hapus file lama
         if (req.file) {
             finalBookData.cover_image_url = req.file.path.replace('public', '');
-            
-            // Hapus gambar lama (jika ada dan bukan gambar default)
             if (existingBook.cover_image_url && existingBook.cover_image_url !== '/uploads/covers/default.jpg') {
                 const oldImagePath = path.join(__dirname, '../../public', existingBook.cover_image_url);
                 if (fs.existsSync(oldImagePath)) {
@@ -140,27 +122,34 @@ exports.postUpdateBook = async (req, res) => {
             }
         }
 
-        // Update data di database
         await Book.update(id, finalBookData);
         res.redirect('/admin/books');
 
     } catch (dbError) {
-        console.error('DATABASE ERROR:', dbError);
-        // Jika ada error saat update, render kembali halaman edit dengan pesan
+        console.error('DATABASE ERROR (Update):', dbError);
         const categories = await Category.findAll();
+        // Saat render ulang karena error, kita perlu fetch lagi data buku agar form terisi benar
+        const bookForRender = await Book.findById(id);
         res.render('admin/books/edit', {
             title: 'Edit Buku',
             categories: categories,
-            book: req.body, // Kirim kembali data yang baru diinput user
+            book: bookForRender,
             error: 'Gagal mengupdate buku. Cek terminal untuk detail.'
         });
     }
 };
 
-
 // Memproses penghapusan buku
 exports.postDeleteBook = async (req, res) => {
     try {
+        // Sebelum menghapus record buku, hapus dulu file gambarnya jika ada
+        const book = await Book.findById(req.params.id);
+        if (book && book.cover_image_url && book.cover_image_url !== '/uploads/covers/default.jpg') {
+            const imagePath = path.join(__dirname, '../../public', book.cover_image_url);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
         await Book.remove(req.params.id);
         res.redirect('/admin/books');
     } catch (error) {

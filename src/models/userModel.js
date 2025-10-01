@@ -27,6 +27,24 @@ const User = {
             [id]
         );
         return rows[0];
+    },
+
+    // FUNGSI BARU: Mengupdate username dan email
+    updateProfile: async (id, username, email) => {
+        const [result] = await db.execute(
+            'UPDATE users SET username = ?, email = ? WHERE id = ?',
+            [username, email, id]
+        );
+        return result.affectedRows;
+    },
+
+    // FUNGSI BARU: Mengupdate password
+    updatePassword: async (id, hashedPassword) => {
+        const [result] = await db.execute(
+            'UPDATE users SET password = ? WHERE id = ?',
+            [hashedPassword, id]
+        );
+        return result.affectedRows;
     }
 };
 

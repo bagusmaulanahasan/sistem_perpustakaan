@@ -20,4 +20,9 @@ router.post('/pinjam/:id', memberController.borrowBook);
 router.get('/dipinjam', memberController.showBorrowedBooks);
 router.get('/riwayat', memberController.showBorrowingHistory);
 
+// Rute Profil
+router.get('/profil', memberController.getProfilePage);
+router.post('/profil/update', memberController.updateProfile);
+router.post('/profil/change-password', memberController.changePassword);
+
 module.exports = router;

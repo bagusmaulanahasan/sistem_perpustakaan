@@ -25,6 +25,7 @@
                     <a href="/wishlist" class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded">Wishlist</a>
                     <a href="/dipinjam" class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded">Buku Dipinjam</a>
                     <a href="/riwayat" class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded">Riwayat Pinjaman</a> 
+                    <a href="/profil" class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded border-t border-gray-700 pt-4">Profil Saya</a> 
                     <% } %>
             </nav>
             <div class="absolute bottom-0 w-64 p-4">
@@ -36,8 +37,8 @@
             <header class="bg-white shadow-sm p-4 flex justify-between items-center">
                 <h1 class="text-xl font-semibold text-gray-700"><%= title %></h1>
                 <div class="text-right">
-                    <p class="font-medium">~username~</p>
-                    <p class="text-sm text-gray-500">~email~</p>
+                    <p class="font-medium"><%= user.username %></p>
+                    <p class="font-medium"><%= user.email %></p>
                 </div>
             </header>
             <div class="flex-1 p-6 overflow-y-auto">

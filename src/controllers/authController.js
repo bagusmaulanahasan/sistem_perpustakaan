@@ -16,7 +16,7 @@ exports.postRegister = async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        // 1. Cek apakah email sudah terdaftar
+        // 1. Cek apakah emaiusernamel sudah terdaftar
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
             return res.render("register", {
@@ -94,6 +94,7 @@ exports.postLogin = async (req, res) => {
             role: user.role,
         };
 
+        
         // 4. Redirect ke halaman utama (misal: /books)
         return res.redirect("/books"); // Ganti dengan rute halaman utama Anda nanti
     } catch (error) {

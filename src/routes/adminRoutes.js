@@ -6,12 +6,12 @@ const { isLoggedIn, isAdmin } = require('../middleware/authMiddleware');
 const categoryController = require('../controllers/categoryController');
 const bookController = require('../controllers/bookController');
 const adminController = require('../controllers/adminController');
-const upload = require('../middleware/uploadMiddleware');
+const upload = require('../middleware/uploadMiddleware'); // Pastikan ini diimpor
 
 // Lindungi semua rute admin dengan middleware
 router.use(isLoggedIn, isAdmin);
 
-// Rute Home Admin (contoh, bisa diarahkan ke data buku)
+// Rute Home Admin
 router.get('/', (req, res) => res.redirect('/admin/books'));
 
 // Rute Kategori
@@ -25,16 +25,22 @@ router.post('/categories/delete/:id', categoryController.postDeleteCategory);
 // Rute Buku
 router.get('/books', bookController.listBooks);
 router.get('/books/new', bookController.getCreatePage);
-router.post('/books', bookController.postCreateBook);
 router.get('/books/edit/:id', bookController.getEditPage);
-router.post('/books/update/:id', bookController.postUpdateBook);
 router.post('/books/delete/:id', bookController.postDeleteBook);
 
-// Rute Peminjaman (Fitur Baru)
+// --- PASTIKAN DUA BARIS DI BAWAH INI BENAR ---
+// Rute untuk CREATE buku (membutuhkan middleware upload)
+router.post('/books', upload.single('cover_image'), bookController.postCreateBook);
+
+// Rute untuk UPDATE buku (juga membutuhkan middleware upload)
+router.post('/books/update/:id', upload.single('cover_image'), bookController.postUpdateBook);
+// ---------------------------------------------
+
+// Rute Peminjaman
 router.get('/borrowings', adminController.showBorrowedList);
 router.post('/borrowings/return/:id', adminController.returnBook);
 
-// Rute Riwayat Peminjaman (Fitur Baru)
+// Rute Riwayat Peminjaman
 router.get('/history', adminController.showHistoryList);
 
 module.exports = router;

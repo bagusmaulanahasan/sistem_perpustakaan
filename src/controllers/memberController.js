@@ -3,18 +3,19 @@ const Category = require('../models/categoryModel');
 const Wishlist = require('../models/wishlistModel'); // <-- Tambahkan ini di atas
 const Borrowing = require('../models/borrowingModel'); // <-- Impor model baru
 const db = require('../config/database'); // <-- Impor pool database untuk transaksi
+const User = require('../models/userModel'); // Pastikan User model sudah diimpor
+const bcrypt = require('bcryptjs');      // Impor bcrypt untuk password
 
 // Menampilkan halaman katalog buku
+// Ganti fungsi showCatalog Anda dengan ini
 exports.showCatalog = async (req, res) => {
     try {
-        const { kategori } = req.query; // Ambil query string ?kategori=id
+        const { kategori } = req.query;
         let books;
 
         if (kategori) {
-            // Jika ada filter kategori, cari buku berdasarkan kategori
             books = await Book.findByCategory(kategori);
         } else {
-            // Jika tidak, tampilkan semua buku
             books = await Book.findAll();
         }
         
@@ -24,7 +25,7 @@ exports.showCatalog = async (req, res) => {
             title: 'Katalog Buku',
             books,
             categories,
-            selectedCategory: kategori // Untuk menandai kategori aktif di view
+            selectedCategory: kategori
         });
 
     } catch (error) {
@@ -93,6 +94,7 @@ exports.removeFromWishlist = async (req, res) => {
         res.status(500).send('Gagal menghapus dari wishlist');
     }
 };
+
 
 
 // Memproses peminjaman buku (DENGAN TRANSAKSI)
@@ -166,5 +168,88 @@ exports.showBorrowingHistory = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send('Terjadi kesalahan pada server');
+    }
+};
+
+
+// Menampilkan halaman profil
+exports.getProfilePage = async (req, res) => {
+    try {
+        // Ambil data user dari session untuk ditampilkan
+        const user = req.session.user;
+        res.render('member/profile', {
+            title: 'Profil Saya',
+            user,
+            success: req.query.success, // Untuk notifikasi sukses
+            error: req.query.error      // Untuk notifikasi error
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Terjadi kesalahan pada server');
+    }
+};
+
+// Memproses update profil (username & email)
+exports.updateProfile = async (req, res) => {
+    const { id } = req.session.user;
+    const { username, email } = req.body;
+
+    // Validasi dasar
+    if (!username || !email) {
+        return res.redirect('/profil?error=Username dan Email tidak boleh kosong');
+    }
+
+    try {
+        await User.updateProfile(id, username, email);
+        
+        // Perbarui juga data di session agar header ikut berubah
+        req.session.user.username = username;
+        req.session.user.email = email;
+
+        res.redirect('/profil?success=Profil berhasil diperbarui');
+    } catch (error) {
+        console.error(error);
+        // Tangani error jika email sudah terdaftar (dari UNIQUE constraint di DB)
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.redirect('/profil?error=Email sudah digunakan oleh akun lain');
+        }
+        res.redirect('/profil?error=Gagal memperbarui profil');
+    }
+};
+
+// Memproses perubahan password
+exports.changePassword = async (req, res) => {
+    const { id } = req.session.user;
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    // 1. Validasi input
+    if (newPassword !== confirmPassword) {
+        return res.redirect('/profil?error=Password baru tidak cocok dengan konfirmasi');
+    }
+    if (newPassword.length < 6) {
+        return res.redirect('/profil?error=Password baru minimal harus 6 karakter');
+    }
+
+    try {
+        // 2. Ambil data user lengkap dari DB (termasuk hash password saat ini)
+        const user = await User.findById(id);
+        if (!user) {
+            return res.redirect('/login'); // Sesi tidak valid
+        }
+
+        // 3. Verifikasi password saat ini
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.redirect('/profil?error=Password saat ini salah');
+        }
+
+        // 4. Hash password baru dan simpan
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        await User.updatePassword(id, hashedPassword);
+
+        res.redirect('/profil?success=Password berhasil diubah');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/profil?error=Gagal mengubah password');
     }
 };
