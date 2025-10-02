@@ -1,3 +1,6 @@
+const path = require('path');
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
 const Borrowing = require('../models/borrowingModel');
 
 // Menampilkan halaman daftar buku yang sedang dipinjam
@@ -54,4 +57,40 @@ exports.returnBook = async (req, res) => {
     }
 };
 
+// FUNGSI BARU UNTUK DOWNLOAD LAPORAN RIWAYAT SEBAGAI PDF
+exports.downloadHistoryPDF = async (req, res) => {
+    try {
+        // Panggil fungsi baru dari model yang mengurutkan berdasarkan nama
+        const borrowings = await Borrowing.findAllHistorySortedByUsername();
 
+        // Render template EJS khusus laporan admin
+        const templatePath = path.join(__dirname, '..', 'views', 'laporan', 'admin-riwayat.ejs');
+        const html = await ejs.renderFile(templatePath, { borrowings });
+
+        // Proses Puppeteer untuk membuat PDF
+        const browser = await puppeteer.launch({ 
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '25px', right: '25px', bottom: '25px', left: '25px' }
+        });
+
+        await browser.close();
+
+        // Kirim PDF ke browser
+        const filename = `Laporan_Riwayat_Peminjaman_${Date.now()}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('Error saat membuat laporan PDF admin:', error);
+        res.status(500).send('Gagal membuat laporan PDF.');
+    }
+};

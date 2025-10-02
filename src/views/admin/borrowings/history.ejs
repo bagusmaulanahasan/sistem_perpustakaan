@@ -1,14 +1,41 @@
 <div class="bg-white p-6 rounded-lg shadow-md">
-    <form action="/admin/history" method="GET" class="mb-4"> <div class="flex">
-            <input type="text" name="search" placeholder="Cari berdasarkan user, judul, penulis, dll..." value="<%= searchTerm %>" class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700">Cari</button>
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-3xl font-bold text-gray-800">Riwayat Peminjaman</h1>
+        <a
+            href="/admin/history/download"
+            target="_blank"
+            class="px-4 py-2 text-base font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+            <i class="fas fa-download mr-2"></i> Download Laporan (PDF)
+        </a>
+    </div>
+
+    <form action="/admin/history" method="GET" class="mb-4">
+        <div class="flex">
+            <input
+                type="text"
+                name="search"
+                placeholder="Cari berdasarkan user, judul, penulis, dll..."
+                value="<%= searchTerm %>"
+                class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <button
+                type="submit"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700"
+            >
+                Cari
+            </button>
         </div>
     </form>
 
     <div class="mb-4 text-sm text-gray-600">
-        Menampilkan <strong><%= count %></strong> data dari riwayat peminjaman. <% if (searchTerm) { %>
-            <span>untuk kata kunci "<%= searchTerm %>"</span>
-            <a href="/admin/history" class="text-indigo-600 hover:underline ml-2">[Reset]</a> <% } %>
+        Menampilkan <strong><%= count %></strong> data dari riwayat peminjaman.
+        <% if (searchTerm) { %>
+        <span>untuk kata kunci "<%= searchTerm %>"</span>
+        <a href="/admin/history" class="text-indigo-600 hover:underline ml-2"
+            >[Reset]</a
+        >
+        <% } %>
     </div>
 
     <div class="overflow-x-auto">
@@ -18,22 +45,39 @@
                     <th class="py-2 px-4 text-left">Judul Buku</th>
                     <th class="py-2 px-4 text-left">Peminjam</th>
                     <th class="py-2 px-4 text-left">Tgl Pinjam</th>
-                    <th class="py-2 px-4 text-left">Tgl Kembali</th> </tr>
+                    <th class="py-2 px-4 text-left">Tgl Kembali</th>
+                </tr>
             </thead>
             <tbody>
                 <% if (borrowings.length === 0) { %>
-                    <tr>
-                        <td colspan="4" class="text-center py-4 text-gray-500">Tidak ada data untuk ditampilkan.</td>
-                    </tr>
-                <% } else { %>
-                    <% borrowings.forEach(b => { %>
-                        <tr class="border-b">
-                            <td class="py-2 px-4 font-medium"><%= b.title %><br><span class="text-xs text-gray-500"><%= b.author %></span></td>
-                            <td class="py-2 px-4"><%= b.username %><br><span class="text-xs text-gray-500"><%= b.email %></span></td>
-                            <td class="py-2 px-4"><%= new Date(b.borrow_date).toLocaleDateString('id-ID') %></td>
-                            <td class="py-2 px-4 text-green-600"><%= new Date(b.return_date).toLocaleDateString('id-ID') %></td> </tr>
-                    <% }) %>
-                <% } %>
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-gray-500">
+                        Tidak ada data untuk ditampilkan.
+                    </td>
+                </tr>
+                <% } else { %> <% borrowings.forEach(b => { %>
+                <tr class="border-b">
+                    <td class="py-2 px-4 font-medium">
+                        <%= b.title %><br /><span class="text-xs text-gray-500"
+                            ><%= b.author %></span
+                        >
+                    </td>
+                    <td class="py-2 px-4">
+                        <%= b.username %><br /><span
+                            class="text-xs text-gray-500"
+                            ><%= b.email %></span
+                        >
+                    </td>
+                    <td class="py-2 px-4">
+                        <%= new Date(b.borrow_date).toLocaleDateString('id-ID')
+                        %>
+                    </td>
+                    <td class="py-2 px-4 text-green-600">
+                        <%= new Date(b.return_date).toLocaleDateString('id-ID')
+                        %>
+                    </td>
+                </tr>
+                <% }) %> <% } %>
             </tbody>
         </table>
     </div>

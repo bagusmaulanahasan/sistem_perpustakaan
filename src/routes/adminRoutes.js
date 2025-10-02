@@ -43,4 +43,7 @@ router.post('/borrowings/return/:id', adminController.returnBook);
 // Rute Riwayat Peminjaman
 router.get('/history', adminController.showHistoryList);
 
+// TAMBAHKAN RUTE BARU DI SINI
+router.get('/history/download', adminController.downloadHistoryPDF);
+
 module.exports = router;

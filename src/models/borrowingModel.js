@@ -402,6 +402,28 @@ const Borrowing = {
         );
         return rows.length > 0; // Return true jika sedang dipinjam, false jika tidak
     },
+
+        // FUNGSI BARU: Mengambil semua riwayat untuk laporan PDF, diurutkan berdasarkan nama user
+    findAllHistorySortedByUsername: async () => {
+        const query = `
+            SELECT
+                b.title,
+                b.author,
+                u.username,
+                u.email,
+                br.borrow_date,
+                br.return_date
+            FROM borrowings br
+            JOIN users u ON br.user_id = u.id
+            JOIN books b ON br.book_id = b.id
+            WHERE br.return_date IS NOT NULL
+            ORDER BY u.username ASC, br.return_date DESC
+        `;
+        // Urutkan berdasarkan username, lalu tanggal kembali untuk setiap user
+
+        const [rows] = await db.execute(query);
+        return rows;
+    },
 };
 
 module.exports = Borrowing;
