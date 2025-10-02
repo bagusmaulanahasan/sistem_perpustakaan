@@ -23,7 +23,7 @@ git clone https://github.com/bagusmaulanahasan/sistem_perpustakaan
 3. Sesuaikan username dan password mysql lewat file `.env`
 4. Jalankan perintah berikut untuk menjalankan project:
 ```bash
-cd sistem-perpustakaan
+cd sistem_perpustakaan
 npm install
 node app.js
 ```
@@ -32,4 +32,5 @@ node app.js
 ## Akun Login untuk Admin
 
 Email: admin@gmail.com
+</br>
 Password: adm123
