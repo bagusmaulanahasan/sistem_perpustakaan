@@ -1,14 +1,19 @@
 const Category = require('../models/categoryModel');
 
-// Menampilkan semua kategori (Read)
+// GANTI FUNGSI listCategories DENGAN INI
 exports.listCategories = async (req, res) => {
     try {
-        const categories = await Category.findAll();
-        // Nanti kita akan membuat view khusus untuk ini, contoh: 'admin/categories/index'
+        const searchTerm = req.query.search || '';
+        const options = { searchTerm };
+
+        const categories = await Category.findAll(options);
+        const totalCategories = await Category.countAll(options);
+
         res.render('admin/categories/index', { 
             categories,
-            user: req.session.user, // Kirim data user ke view
-            title: 'Manajemen Kategori' 
+            title: 'Manajemen Kategori',
+            count: totalCategories,
+            searchTerm
         });
     } catch (error) {
         console.error(error);

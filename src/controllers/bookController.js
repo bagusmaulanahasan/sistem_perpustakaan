@@ -5,13 +5,21 @@ const Book = require('../models/bookModel');
 const Category = require('../models/categoryModel');
 const upload = require('../middleware/uploadMiddleware');
 
-// Menampilkan daftar semua buku (versi sederhana tanpa pagination)
+// GANTI FUNGSI listBooks YANG LAMA DENGAN INI
 exports.listBooks = async (req, res) => {
     try {
-        const books = await Book.findAll();
+        const searchTerm = req.query.search || ''; // Ambil kata kunci dari URL
+
+        const options = { searchTerm };
+
+        const books = await Book.findAll(options);
+        const totalBooks = await Book.countAll(options); // Hitung total buku berdasarkan pencarian
+        
         res.render('admin/books/index', {
+            title: 'Manajemen Buku',
             books,
-            title: 'Manajemen Buku'
+            count: totalBooks, // Kirim jumlah total ke view
+            searchTerm // Kirim searchTerm ke view
         });
     } catch (error) {
         console.error(error);

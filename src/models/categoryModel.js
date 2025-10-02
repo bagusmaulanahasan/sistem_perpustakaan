@@ -9,9 +9,35 @@ const Category = {
         return result.insertId;
     },
 
-    findAll: async () => {
-        const [rows] = await db.execute('SELECT * FROM `categories` ORDER BY `name` ASC');
+    // GANTI FUNGSI findAll DENGAN INI
+    findAll: async (options = {}) => {
+        const { searchTerm } = options;
+        let query = 'SELECT * FROM `categories`';
+        const params = [];
+
+        if (searchTerm) {
+            query += ' WHERE `name` LIKE ?';
+            params.push(`%${searchTerm}%`);
+        }
+
+        query += ' ORDER BY `name` ASC';
+        const [rows] = await db.execute(query, params);
         return rows;
+    },
+
+    // FUNGSI BARU UNTUK MENGHITUNG TOTAL
+    countAll: async (options = {}) => {
+        const { searchTerm } = options;
+        let query = 'SELECT COUNT(*) as total FROM `categories`';
+        const params = [];
+        
+        if (searchTerm) {
+            query += ' WHERE `name` LIKE ?';
+            params.push(`%${searchTerm}%`);
+        }
+
+        const [rows] = await db.execute(query, params);
+        return rows[0].total;
     },
 
     findById: async (id) => {
@@ -28,7 +54,6 @@ const Category = {
     },
 
     remove: async (id) => {
-        // Hati-hati: Pastikan foreign key di tabel 'books' di-set ke ON DELETE SET NULL
         const [result] = await db.execute('DELETE FROM `categories` WHERE `id` = ?', [id]);
         return result.affectedRows;
     }

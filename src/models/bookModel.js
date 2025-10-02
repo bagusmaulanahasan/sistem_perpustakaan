@@ -93,6 +93,7 @@ const Book = {
         await (connection || db).execute(sql, [bookId]);
     },
 
+    // GANTI FUNGSI findAll DENGAN INI
     findAll: async (options = {}) => {
         const { searchTerm } = options;
         let query = `
@@ -103,14 +104,37 @@ const Book = {
         const params = [];
 
         if (searchTerm) {
-            query += ` WHERE (b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ?)`;
+            // Tambahkan c.name LIKE ? ke dalam kondisi WHERE
+            query += ` WHERE (b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ? OR c.name LIKE ?)`;
             const likeTerm = `%${searchTerm}%`;
-            params.push(likeTerm, likeTerm, likeTerm);
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm); // Tambahkan parameter keempat
         }
 
         query += ` ORDER BY b.title ASC`;
         const [rows] = await db.execute(query, params);
         return rows;
+    },
+
+    // GANTI FUNGSI countAll DENGAN INI
+    countAll: async (options = {}) => {
+        const { searchTerm } = options;
+        // Tambahkan JOIN dengan tabel categories di sini juga
+        let query = `
+        SELECT COUNT(*) AS total 
+        FROM books b
+        LEFT JOIN categories c ON b.category_id = c.id
+    `;
+        const params = [];
+
+        if (searchTerm) {
+            // Tambahkan c.name LIKE ? di sini juga
+            query += ` WHERE (b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ? OR c.name LIKE ?)`;
+            const likeTerm = `%${searchTerm}%`;
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm); // Tambahkan parameter keempat
+        }
+
+        const [rows] = await db.execute(query, params);
+        return rows[0].total;
     },
 
     // GANTI FUNGSI findByCategory

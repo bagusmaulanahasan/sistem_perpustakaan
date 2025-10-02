@@ -39,7 +39,7 @@
                             <td class="py-2 px-4 font-medium text-red-600"><%= new Date(b.due_date).toLocaleDateString('id-ID') %></td>
                             <td class="py-2 px-4">
                                 <form action="/admin/borrowings/return/<%= b.borrowing_id %>" method="POST" onsubmit="return confirm('Anda yakin ingin menandai buku ini sebagai sudah kembali?');">
-                                    <button type="submit" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700">Kembalikan</button>
+                                    <button type="submit" class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 cursor-pointer">Kembalikan</button>
                                 </form>
                             </td>
                         </tr>
