@@ -1,7 +1,8 @@
-<div class="flex">
-    <aside class="w-1/5 pr-8">
-        <h3 class="text-lg font-semibold mb-3">Kategori</h3>
-        <ul class="space-y-2">
+<div class="flex flex-col justify-center items-center">
+    <!-- <aside class=" w-1/5 pr-8"> -->
+    <aside class="sticky top-0 w-full bg-gray-100 pt-4 pb-2">
+        <!-- <h3 class="text-lg font-semibold mb-3">Kategori</h3> -->
+        <ul class="space-y-2 flex gap-6 px-4 overflow-x-auto">
             <li>
                 <a href="/katalog" class="block text-gray-700 hover:text-indigo-600 <%= !selectedCategory ? 'font-bold text-indigo-600' : '' %>">
                     Semua Kategori
@@ -17,7 +18,8 @@
         </ul>
     </aside>
 
-    <main class="w-4/5">
+    <!-- <main class="w-4/5"> -->
+    <main class="w-full px-4">
         <% if (books.length === 0) { %>
             <div class="text-center py-10 bg-white rounded-lg shadow-md">
                 <p class="text-gray-500">Tidak ada buku yang ditemukan.</p>
