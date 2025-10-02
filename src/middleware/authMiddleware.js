@@ -15,3 +15,14 @@ exports.isAdmin = (req, res, next) => {
     }
     next();
 };
+
+// FUNGSI BARU: Middleware untuk mengecek apakah user adalah anggota
+exports.isAnggota = (req, res, next) => {
+    // Pastikan user ada dan rolenya adalah 'anggota'
+    if (req.session.user && req.session.user.role === 'anggota') {
+        // Jika benar anggota, lanjutkan ke proses berikutnya
+        return next();
+    }
+    // Jika bukan anggota (berarti admin), alihkan ke dashboard admin
+    res.redirect('/admin');
+};
