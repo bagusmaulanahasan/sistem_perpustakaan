@@ -4,15 +4,6 @@ const bookController = require("../controllers/bookController");
 const { isLoggedIn, isAdmin } = require("../middleware/authMiddleware");
 const uploadWithValidation = require("../middleware/uploadMiddleware");
 
-console.log("=====================================================");
-console.log("--- Memeriksa Impor Controller di bookRoutes.js ---");
-console.log("Isi dari object bookController:", bookController);
-console.log(
-    "Tipe dari bookController.postCreateBook:",
-    typeof bookController.postCreateBook
-);
-console.log("=====================================================");
-
 router.use(isLoggedIn, isAdmin);
 
 router.get("/", bookController.listBooks);
