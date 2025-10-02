@@ -1,3 +1,6 @@
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
+
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -163,5 +166,45 @@ exports.postDeleteBook = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send('Gagal menghapus buku');
+    }
+};
+
+// FUNGSI BARU UNTUK DOWNLOAD LAPORAN DATA BUKU SEBAGAI PDF
+exports.downloadBookListPDF = async (req, res) => {
+    try {
+        // Kita gunakan fungsi findAll() yang sudah ada untuk mengambil semua buku
+        // Kita tidak perlu searchTerm karena laporan ini untuk semua buku
+        const books = await Book.findAll();
+
+        // Render template EJS khusus laporan data buku
+        const templatePath = path.join(__dirname, '..', 'views', 'laporan', 'admin-data-buku.ejs');
+        const html = await ejs.renderFile(templatePath, { books });
+
+        // Proses Puppeteer untuk membuat PDF
+        const browser = await puppeteer.launch({ 
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '25px', right: '25px', bottom: '25px', left: '25px' }
+        });
+
+        await browser.close();
+
+        // Kirim PDF ke browser
+        const filename = `Laporan_Data_Buku_${Date.now()}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+
+    } catch (error)
+    {
+        console.error('Error saat membuat laporan PDF Data Buku:', error);
+        res.status(500).send('Gagal membuat laporan PDF.');
     }
 };

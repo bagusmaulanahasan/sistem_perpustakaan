@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 // Menggunakan Routes
 app.use('/', authRoutes);
 // app.use('/admin/categories', categoryRoutes); // <-- Tambahkan ini
-// app.use('/admin/books', bookRoutes); // <-- Tambahkan ini
+app.use('/admin/books', bookRoutes); // <-- Tambahkan ini
 app.use('/', memberRoutes); // <-- Tambahkan ini
 app.use('/admin', adminRoutes); // <-- Gunakan rute admin dengan awalan /admin
 

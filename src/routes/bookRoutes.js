@@ -18,4 +18,6 @@ router.get('/edit/:id', bookController.getEditPage);
 router.post('/update/:id', bookController.postUpdateBook);
 router.post('/delete/:id', bookController.postDeleteBook);
 
+router.get('/download', bookController.downloadBookListPDF);
+
 module.exports = router;
