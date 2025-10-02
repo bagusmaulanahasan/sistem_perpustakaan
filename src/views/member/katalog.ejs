@@ -2,7 +2,7 @@
     <!-- <aside class=" w-1/5 pr-8"> -->
     <aside class="sticky top-0 w-full bg-gray-100 pt-4 pb-2">
         <!-- <h3 class="text-lg font-semibold mb-3">Kategori</h3> -->
-        <form method="GET" action="/katalog" class="mb-6">
+        <form method="GET" action="/katalog" class="mb-4">
             <div class="flex">
                 <input
                     type="text"
@@ -18,14 +18,23 @@
                     Cari
                 </button>
             </div>
+        </form>
+
+        <div class="mb-4 text-sm text-gray-600">
+            Menampilkan <strong><%= count %></strong> buku.
             <% if (searchTerm) { %>
-            <a
+                <span>untuk kata kunci "<%= searchTerm %>"</span>
+                            <a
                 href="/katalog"
                 class="text-sm text-indigo-600 hover:underline mt-2 inline-block"
-                >Reset Pencarian</a
+                >[Reset Pencarian]</a
             >
             <% } %>
-        </form>
+            <% if (selectedCategory) { %>
+                <span>dalam kategori yang dipilih.</span>
+            <% } %>
+        </div>
+
         <ul class="space-y-2 flex gap-6 px-4 overflow-x-auto">
             <li>
                 <a

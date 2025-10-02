@@ -207,7 +207,67 @@ findActiveByUser: async (userId, options = {}) => {
             // 6. Selalu lepaskan koneksi
             connection.release();
         }
-    }
+    },
+
+    // FUNGSI BARU: Menghitung buku yang sedang dipinjam oleh user
+    countActiveByUser: async (userId, options = {}) => {
+        const { searchTerm } = options;
+        let query = `
+            SELECT COUNT(*) AS total
+            FROM borrowings br
+            JOIN books b ON br.book_id = b.id
+            LEFT JOIN categories c ON b.category_id = c.id
+            WHERE br.user_id = ? AND br.return_date IS NULL
+        `;
+        const params = [userId];
+
+        if (searchTerm) {
+            // ... (logika pencarian tanggal dan teks sama seperti findActiveByUser)
+            const likeTerm = `%${searchTerm}%`;
+            const searchNumber = parseInt(searchTerm);
+            query += ` AND (`
+            const searchConditions = [`b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`, `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.due_date) LIKE ?`];
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            if (!isNaN(searchNumber)) {
+                searchConditions.push(`DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`, `DAY(br.due_date) = ?`, `MONTH(br.due_date) = ?`, `YEAR(br.due_date) = ?`);
+                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+            }
+            query += searchConditions.join(' OR ') + `)`;
+        }
+
+        const [rows] = await db.execute(query, params);
+        return rows[0].total;
+    },
+
+    // FUNGSI BARU: Menghitung riwayat peminjaman user
+    countHistoryByUser: async (userId, options = {}) => {
+        const { searchTerm } = options;
+        let query = `
+            SELECT COUNT(*) AS total
+            FROM borrowings br
+            JOIN books b ON br.book_id = b.id
+            LEFT JOIN categories c ON b.category_id = c.id
+            WHERE br.user_id = ? AND br.return_date IS NOT NULL
+        `;
+        const params = [userId];
+
+        if (searchTerm) {
+            // ... (logika pencarian tanggal dan teks sama seperti findHistoryByUser)
+            const likeTerm = `%${searchTerm}%`;
+            const searchNumber = parseInt(searchTerm);
+            query += ` AND (`
+            const searchConditions = [`b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`, `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.return_date) LIKE ?`];
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            if (!isNaN(searchNumber)) {
+                searchConditions.push(`DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`, `DAY(br.return_date) = ?`, `MONTH(br.return_date) = ?`, `YEAR(br.return_date) = ?`);
+                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+            }
+            query += searchConditions.join(' OR ') + `)`;
+        }
+        
+        const [rows] = await db.execute(query, params);
+        return rows[0].total;
+    },
 };
 
 

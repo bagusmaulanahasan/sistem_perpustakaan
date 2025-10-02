@@ -6,22 +6,20 @@ const db = require('../config/database'); // <-- Impor pool database untuk trans
 const User = require('../models/userModel'); // Pastikan User model sudah diimpor
 const bcrypt = require('bcryptjs');      // Impor bcrypt untuk password
 
-// Menampilkan halaman katalog buku
+// GANTI FUNGSI showCatalog
 exports.showCatalog = async (req, res) => {
     try {
         const searchTerm = req.query.search || '';
         const categoryId = req.query.kategori || '';
         let books;
 
-        const options = { searchTerm };
-
-        if (categoryId) {
-            // Jika ada filter kategori, cari buku di kategori tersebut
-            books = await Book.findByCategory(categoryId, options);
-        } else {
-            // Jika tidak, cari di semua buku
-            books = await Book.findAll(options);
-        }
+        const findOptions = { searchTerm, categoryId };
+        const countOptions = { searchTerm, categoryId };
+        
+        // Logika untuk findByCategory tidak ada di model yang di-rollback,
+        // jadi kita sederhanakan panggilannya ke findAll saja.
+        books = await Book.findAll(findOptions); 
+        const totalBooks = await Book.countAll(countOptions); // Panggil fungsi count
         
         const categories = await Category.findAll();
 
@@ -29,8 +27,9 @@ exports.showCatalog = async (req, res) => {
             title: 'Katalog Buku',
             books,
             categories,
+            count: totalBooks, // Kirim count ke view
             selectedCategory: categoryId,
-            searchTerm // Kirim searchTerm ke view
+            searchTerm
         });
 
     } catch (error) {
@@ -38,6 +37,7 @@ exports.showCatalog = async (req, res) => {
         res.status(500).send('Terjadi kesalahan pada server');
     }
 };
+
 // Menampilkan halaman detail satu buku
 exports.showBookDetail = async (req, res) => {
     try {
@@ -60,15 +60,17 @@ exports.showBookDetail = async (req, res) => {
 exports.showWishlist = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const searchTerm = req.query.search || ''; // Ambil kata kunci dari URL
-
-        // Panggil model dengan opsi pencarian
-        const books = await Wishlist.findByUser(userId, { searchTerm });
+        const searchTerm = req.query.search || '';
+        const options = { searchTerm };
+        
+        const books = await Wishlist.findByUser(userId, options);
+        const totalBooks = await Wishlist.countByUser(userId, options); // Tambahkan ini
         
         res.render('member/wishlist', {
             title: 'Wishlist Saya',
             books,
-            searchTerm // Kirim searchTerm ke view
+            count: totalBooks, // Kirim count ke view
+            searchTerm
         });
     } catch (error) {
         console.error(error);
@@ -154,10 +156,15 @@ exports.showBorrowedBooks = async (req, res) => {
     try {
         const userId = req.session.user.id;
         const searchTerm = req.query.search || '';
-        const books = await Borrowing.findActiveByUser(userId, { searchTerm });
+        const options = { searchTerm };
+
+        const books = await Borrowing.findActiveByUser(userId, options);
+        const totalBooks = await Borrowing.countActiveByUser(userId, options); // Tambahkan ini
+        
         res.render('member/borrowed', {
             title: 'Buku yang Sedang Dipinjam',
             books,
+            count: totalBooks, // Kirim count ke view
             searchTerm
         });
     } catch (error) {
@@ -170,12 +177,17 @@ exports.showBorrowedBooks = async (req, res) => {
 exports.showBorrowingHistory = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const searchTerm = req.query.search || ''; // Ambil kata kunci dari URL
-        const books = await Borrowing.findHistoryByUser(userId, { searchTerm });
+        const searchTerm = req.query.search || '';
+        const options = { searchTerm };
+
+        const books = await Borrowing.findHistoryByUser(userId, options);
+        const totalBooks = await Borrowing.countHistoryByUser(userId, options); // Tambahkan ini
+        
         res.render('member/history', {
             title: 'Riwayat Peminjaman',
             books,
-            searchTerm // Kirim searchTerm ke view
+            count: totalBooks, // Kirim count ke view
+            searchTerm
         });
     } catch (error) {
         console.error(error);

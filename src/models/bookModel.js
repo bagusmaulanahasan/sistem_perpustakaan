@@ -116,21 +116,53 @@ const Book = {
     },
 
     // GANTI FUNGSI countAll DENGAN INI
-    countAll: async (options = {}) => {
-        const { searchTerm } = options;
-        // Tambahkan JOIN dengan tabel categories di sini juga
-        let query = `
-        SELECT COUNT(*) AS total 
-        FROM books b
-        LEFT JOIN categories c ON b.category_id = c.id
-    `;
-        const params = [];
+    // countAll: async (options = {}) => {
+    //     const { searchTerm } = options;
+    //     // Tambahkan JOIN dengan tabel categories di sini juga
+    //     let query = `
+    //     SELECT COUNT(*) AS total 
+    //     FROM books b
+    //     LEFT JOIN categories c ON b.category_id = c.id
+    // `;
+    //     const params = [];
 
+    //     if (searchTerm) {
+    //         // Tambahkan c.name LIKE ? di sini juga
+    //         query += ` WHERE (b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ? OR c.name LIKE ?)`;
+    //         const likeTerm = `%${searchTerm}%`;
+    //         params.push(likeTerm, likeTerm, likeTerm, likeTerm); // Tambahkan parameter keempat
+    //     }
+
+    //     const [rows] = await db.execute(query, params);
+    //     return rows[0].total;
+    // },
+
+        // FUNGSI BARU UNTUK MENGHITUNG TOTAL BUKU DI KATALOG
+    countAll: async (options = {}) => {
+        const { searchTerm, categoryId } = options;
+        let query = `
+            SELECT COUNT(*) AS total 
+            FROM books b
+            LEFT JOIN categories c ON b.category_id = c.id
+        `;
+        const params = [];
+        const conditions = [];
+
+        // Filter berdasarkan kata kunci pencarian
         if (searchTerm) {
-            // Tambahkan c.name LIKE ? di sini juga
-            query += ` WHERE (b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ? OR c.name LIKE ?)`;
+            conditions.push(`(b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ? OR c.name LIKE ?)`);
             const likeTerm = `%${searchTerm}%`;
-            params.push(likeTerm, likeTerm, likeTerm, likeTerm); // Tambahkan parameter keempat
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm);
+        }
+
+        // Filter berdasarkan kategori
+        if (categoryId) {
+            conditions.push(`b.category_id = ?`);
+            params.push(categoryId);
+        }
+        
+        if (conditions.length > 0) {
+            query += ` WHERE ` + conditions.join(' AND ');
         }
 
         const [rows] = await db.execute(query, params);
