@@ -16,28 +16,83 @@ const Borrowing = {
     },
 
     // Menampilkan buku yang sedang dipinjam oleh user
-    findActiveByUser: async (userId) => {
-        const [rows] = await db.execute(`
-            SELECT b.title, b.author, br.borrow_date, br.due_date
+findActiveByUser: async (userId, options = {}) => {
+        const { searchTerm } = options;
+        let query = `
+            SELECT b.title, b.author, b.publisher, c.name AS category_name,
+                   br.borrow_date, br.due_date
             FROM borrowings br
             JOIN books b ON br.book_id = b.id
+            LEFT JOIN categories c ON b.category_id = c.id
             WHERE br.user_id = ? AND br.return_date IS NULL
-            ORDER BY br.due_date ASC
-        `, [userId]);
+        `;
+        const params = [userId];
+
+        if (searchTerm) {
+            const likeTerm = `%${searchTerm}%`;
+            const searchNumber = parseInt(searchTerm);
+
+            query += ` AND (`
+            const searchConditions = [
+                `b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`,
+                `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.due_date) LIKE ?`
+            ];
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+
+            if (!isNaN(searchNumber)) {
+                searchConditions.push(
+                    `DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`,
+                    `DAY(br.due_date) = ?`, `MONTH(br.due_date) = ?`, `YEAR(br.due_date) = ?`
+                );
+                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+            }
+            query += searchConditions.join(' OR ') + `)`;
+        }
+
+        query += ` ORDER BY br.due_date ASC`;
+        const [rows] = await db.execute(query, params);
         return rows;
     },
 
-    // Menampilkan riwayat buku yang sudah dikembalikan oleh user
-    findHistoryByUser: async (userId) => {
-        const [rows] = await db.execute(`
-            SELECT b.title, b.author, br.borrow_date, br.return_date
+    // GANTI FUNGSI findHistoryByUser
+    findHistoryByUser: async (userId, options = {}) => {
+        const { searchTerm } = options;
+        let query = `
+            SELECT b.title, b.author, b.publisher, c.name AS category_name,
+                   br.borrow_date, br.return_date
             FROM borrowings br
             JOIN books b ON br.book_id = b.id
+            LEFT JOIN categories c ON b.category_id = c.id
             WHERE br.user_id = ? AND br.return_date IS NOT NULL
-            ORDER BY br.return_date DESC
-        `, [userId]);
+        `;
+        const params = [userId];
+
+        if (searchTerm) {
+            const likeTerm = `%${searchTerm}%`;
+            const searchNumber = parseInt(searchTerm);
+
+            query += ` AND (`
+            const searchConditions = [
+                `b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`,
+                `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.return_date) LIKE ?`
+            ];
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+
+            if (!isNaN(searchNumber)) {
+                searchConditions.push(
+                    `DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`,
+                    `DAY(br.return_date) = ?`, `MONTH(br.return_date) = ?`, `YEAR(br.return_date) = ?`
+                );
+                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+            }
+            query += searchConditions.join(' OR ') + `)`;
+        }
+
+        query += ` ORDER BY br.return_date DESC`;
+        const [rows] = await db.execute(query, params);
         return rows;
     },
+
 
     // FUNGSI BARU: Menampilkan semua buku yang sedang dipinjam (untuk admin) dengan filter pencarian
     findActiveWithSearch: async (searchTerm) => {

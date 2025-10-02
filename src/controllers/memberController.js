@@ -149,14 +149,16 @@ exports.borrowBook = async (req, res) => {
 };
 
 
-// Menampilkan halaman buku yang sedang dipinjam
+// Pastikan fungsi showBorrowedBooks sudah seperti ini
 exports.showBorrowedBooks = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const books = await Borrowing.findActiveByUser(userId);
+        const searchTerm = req.query.search || '';
+        const books = await Borrowing.findActiveByUser(userId, { searchTerm });
         res.render('member/borrowed', {
             title: 'Buku yang Sedang Dipinjam',
-            books
+            books,
+            searchTerm
         });
     } catch (error) {
         console.error(error);
@@ -164,15 +166,16 @@ exports.showBorrowedBooks = async (req, res) => {
     }
 };
 
-
-// Menampilkan halaman riwayat peminjaman
+// GANTI FUNGSI showBorrowingHistory dengan ini
 exports.showBorrowingHistory = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const books = await Borrowing.findHistoryByUser(userId);
+        const searchTerm = req.query.search || ''; // Ambil kata kunci dari URL
+        const books = await Borrowing.findHistoryByUser(userId, { searchTerm });
         res.render('member/history', {
             title: 'Riwayat Peminjaman',
-            books
+            books,
+            searchTerm // Kirim searchTerm ke view
         });
     } catch (error) {
         console.error(error);
