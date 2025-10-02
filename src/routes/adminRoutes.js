@@ -45,5 +45,6 @@ router.get('/history', adminController.showHistoryList);
 
 // TAMBAHKAN RUTE BARU DI SINI
 router.get('/history/download', adminController.downloadHistoryPDF);
+router.get('/borrowings/download', adminController.downloadActiveBorrowsPDF);
 
 module.exports = router;

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Laporan Buku Sedang Dipinjam</title>
+        <style>
+            body {
+                font-family: "Helvetica", "Arial", sans-serif;
+                font-size: 11px;
+                color: #333;
+            }
+            .container {
+                width: 100%;
+                margin: 0 auto;
+                padding: 25px;
+            }
+            .header {
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 15px;
+                margin-bottom: 30px;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 22px;
+            }
+            .header p {
+                margin: 5px 0 0;
+                font-size: 14px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 8px;
+                text-align: left;
+            }
+            thead {
+                background-color: #f2f2f2;
+            }
+            .no-data {
+                text-align: center;
+                padding: 20px;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Laporan Buku Sedang Dipinjam</h1>
+                <p>
+                    Diunduh pada: <%= new Date().toLocaleDateString('id-ID', {
+                    day: '2-digit', month: 'long', year: 'numeric' }) %>
+                </p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Nama Peminjam</th>
+                        <th>Judul Buku</th>
+                        <th>Tanggal Pinjam</th>
+                        <th>Jatuh Tempo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(borrowings.length > 0) { %> <%
+                    borrowings.forEach((item, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= item.username %></td>
+                        <td><%= item.title %></td>
+                        <td>
+                            <%= new
+                            Date(item.borrow_date).toLocaleDateString('id-ID')
+                            %>
+                        </td>
+                        <td>
+                            <%= new
+                            Date(item.due_date).toLocaleDateString('id-ID') %>
+                        </td>
+                    </tr>
+                    <% }) %> <% } else { %>
+                    <tr>
+                        <td colspan="5" class="no-data">
+                            Tidak ada buku yang sedang dipinjam saat ini.
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

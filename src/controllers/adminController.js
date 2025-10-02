@@ -94,3 +94,41 @@ exports.downloadHistoryPDF = async (req, res) => {
         res.status(500).send('Gagal membuat laporan PDF.');
     }
 };
+
+// FUNGSI BARU UNTUK DOWNLOAD LAPORAN BUKU SEDANG DIPINJAM SEBAGAI PDF
+exports.downloadActiveBorrowsPDF = async (req, res) => {
+    try {
+        // Panggil fungsi baru dari model untuk data peminjaman aktif
+        const borrowings = await Borrowing.findAllActiveSortedByUsername();
+
+        // Render template EJS khusus laporan peminjaman aktif
+        const templatePath = path.join(__dirname, '..', 'views', 'laporan', 'admin-sedang-dipinjam.ejs');
+        const html = await ejs.renderFile(templatePath, { borrowings });
+
+        // Proses Puppeteer untuk membuat PDF
+        const browser = await puppeteer.launch({ 
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: { top: '25px', right: '25px', bottom: '25px', left: '25px' }
+        });
+
+        await browser.close();
+
+        // Kirim PDF ke browser
+        const filename = `Laporan_Sedang_Dipinjam_${Date.now()}.pdf`;
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        res.send(pdfBuffer);
+
+    } catch (error) {
+        console.error('Error saat membuat laporan PDF Peminjaman Aktif:', error);
+        res.status(500).send('Gagal membuat laporan PDF.');
+    }
+};

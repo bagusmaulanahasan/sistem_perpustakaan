@@ -424,6 +424,28 @@ const Borrowing = {
         const [rows] = await db.execute(query);
         return rows;
     },
+
+        // FUNGSI BARU: Mengambil semua peminjaman AKTIF untuk laporan PDF, diurutkan berdasarkan nama user
+    findAllActiveSortedByUsername: async () => {
+        const query = `
+            SELECT
+                b.title,
+                b.author,
+                u.username,
+                u.email,
+                br.borrow_date,
+                br.due_date
+            FROM borrowings br
+            JOIN users u ON br.user_id = u.id
+            JOIN books b ON br.book_id = b.id
+            WHERE br.return_date IS NULL
+            ORDER BY u.username ASC, br.due_date ASC
+        `;
+        // Urutkan berdasarkan username, lalu jatuh tempo untuk setiap user
+
+        const [rows] = await db.execute(query);
+        return rows;
+    },
 };
 
 module.exports = Borrowing;
