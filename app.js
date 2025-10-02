@@ -70,6 +70,9 @@ app.get('/books', (req, res) => {
     res.redirect('/katalog');
 });
 
+// 2. Gunakan router dengan prefix '/member'
+app.use('/member', memberRoutes); // <-- BAGIAN PALING PENTING
+
 
 app.listen(PORT, () => {
     console.log(`Server berjalan di http://localhost:${PORT}`);

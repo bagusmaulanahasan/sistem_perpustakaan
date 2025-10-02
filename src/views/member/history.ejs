@@ -1,6 +1,18 @@
 <div class="bg-white p-6 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Riwayat Peminjaman</h2>
 
+    <div class="text-end">
+        <a
+            href="/member/history/download"
+            target="_blank"
+            class="flex-shrink-0 px-4 py-2 text-base font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-blue-200"
+            type="button"
+        >
+            <i class="fas fa-download mr-2"></i>Download
+            PDF
+        </a>
+    </div>
+
     <form method="GET" action="/riwayat" class="mb-4">
         <div class="flex">
             <input
@@ -18,10 +30,10 @@
             </button>
         </div>
     </form>
-    
+
     <div class="mb-4 text-sm text-gray-600">
-        Menampilkan <strong><%= count %></strong> data riwayat peminjaman.
-        <% if (searchTerm) { %>
+        Menampilkan <strong><%= count %></strong> data riwayat peminjaman. <% if
+        (searchTerm) { %>
         <span>untuk kata kunci "<%= searchTerm %>"</span>
         <a
             href="/riwayat"

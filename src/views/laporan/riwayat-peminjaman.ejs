@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Riwayat Peminjaman - <%= user.username %></title>
+        <style>
+            body {
+                font-family: "Helvetica", "Arial", sans-serif;
+                font-size: 12px;
+                color: #333;
+            }
+            .container {
+                width: 100%;
+                margin: 0 auto;
+                padding: 25px;
+            }
+            .header {
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 15px;
+                margin-bottom: 30px;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 24px;
+            }
+            .info-pengguna {
+                margin-bottom: 25px;
+            }
+            .info-pengguna p {
+                margin: 4px 0;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 9px;
+                text-align: left;
+            }
+            thead {
+                background-color: #f2f2f2;
+            }
+            .no-data {
+                text-align: center;
+                padding: 20px;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Riwayat Peminjaman Buku</h1>
+            </div>
+
+            <div class="info-pengguna">
+                <p><strong>Nama Anggota:</strong> <%= user.username %></p>
+                <p><strong>Email:</strong> <%= user.email %></p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Judul Buku</th>
+                        <th>Penulis</th>
+                        <th>Tanggal Pinjam</th>
+                        <th>Tanggal Kembali</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if(borrowings.length > 0) { %> <%
+                    borrowings.forEach((item, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= item.title %></td>
+                        <td><%= item.author %></td>
+                        <td>
+                            <%= new
+                            Date(item.borrow_date).toLocaleDateString('id-ID', {
+                            day: '2-digit', month: 'long', year: 'numeric' }) %>
+                        </td>
+                        <td>
+                            <%= new
+                            Date(item.return_date).toLocaleDateString('id-ID', {
+                            day: '2-digit', month: 'long', year: 'numeric' }) %>
+                        </td>
+                        <td>Dikembalikan</td>
+                    </tr>
+                    <% }) %> <% } else { %>
+                    <tr>
+                        <td colspan="6" class="no-data">
+                            Tidak ada riwayat peminjaman.
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

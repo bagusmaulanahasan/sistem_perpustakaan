@@ -23,4 +23,9 @@ router.get('/profil', isLoggedIn, isAnggota, memberController.getProfilePage);
 router.post('/profil/update', isLoggedIn, isAnggota, memberController.updateProfile);
 router.post('/profil/change-password', isLoggedIn, isAnggota, memberController.changePassword);
 
+
+// TAMBAHKAN RUTE BARU DI SINI
+// URL ini yang akan dipanggil oleh tombol "Download PDF"
+router.get('/history/download', isLoggedIn, isAnggota,memberController.downloadHistoryPDF);
+
 module.exports = router;

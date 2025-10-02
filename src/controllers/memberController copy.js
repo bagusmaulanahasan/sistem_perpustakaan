@@ -1,43 +1,40 @@
-const puppeteer = require("puppeteer");
-const path = require("path");
-const ejs = require("ejs");
-
-const Book = require("../models/bookModel");
-const Category = require("../models/categoryModel");
-const Wishlist = require("../models/wishlistModel"); // <-- Tambahkan ini di atas
-const Borrowing = require("../models/borrowingModel"); // <-- Impor model baru
-const db = require("../config/database"); // <-- Impor pool database untuk transaksi
-const User = require("../models/userModel"); // Pastikan User model sudah diimpor
-const bcrypt = require("bcryptjs"); // Impor bcrypt untuk password
+const Book = require('../models/bookModel');
+const Category = require('../models/categoryModel');
+const Wishlist = require('../models/wishlistModel'); // <-- Tambahkan ini di atas
+const Borrowing = require('../models/borrowingModel'); // <-- Impor model baru
+const db = require('../config/database'); // <-- Impor pool database untuk transaksi
+const User = require('../models/userModel'); // Pastikan User model sudah diimpor
+const bcrypt = require('bcryptjs');      // Impor bcrypt untuk password
 
 // GANTI FUNGSI showCatalog
 exports.showCatalog = async (req, res) => {
     try {
-        const searchTerm = req.query.search || "";
-        const categoryId = req.query.kategori || "";
+        const searchTerm = req.query.search || '';
+        const categoryId = req.query.kategori || '';
         let books;
 
         const findOptions = { searchTerm, categoryId };
         const countOptions = { searchTerm, categoryId };
-
+        
         // Logika untuk findByCategory tidak ada di model yang di-rollback,
         // jadi kita sederhanakan panggilannya ke findAll saja.
-        books = await Book.findAll(findOptions);
+        books = await Book.findAll(findOptions); 
         const totalBooks = await Book.countAll(countOptions); // Panggil fungsi count
-
+        
         const categories = await Category.findAll();
 
-        res.render("member/katalog", {
-            title: "Katalog Buku",
+        res.render('member/katalog', {
+            title: 'Katalog Buku',
             books,
             categories,
             count: totalBooks, // Kirim count ke view
             selectedCategory: categoryId,
-            searchTerm,
+            searchTerm
         });
+
     } catch (error) {
         console.error(error);
-        res.status(500).send("Terjadi kesalahan pada server");
+        res.status(500).send('Terjadi kesalahan pada server');
     }
 };
 
@@ -51,22 +48,22 @@ exports.showBookDetail = async (req, res) => {
         const [book, isInWishlist, isBorrowed] = await Promise.all([
             Book.findById(bookId),
             Wishlist.check(userId, bookId),
-            Borrowing.isCurrentlyBorrowed(userId, bookId),
+            Borrowing.isCurrentlyBorrowed(userId, bookId)
         ]);
-
+        
         if (!book) {
-            return res.status(404).send("Buku tidak ditemukan");
+            return res.status(404).send('Buku tidak ditemukan');
         }
 
-        res.render("member/detail", {
+        res.render('member/detail', {
             title: book.title,
             book,
             isInWishlist, // Kirim status wishlist ke view
-            isBorrowed, // Kirim status peminjaman ke view
+            isBorrowed    // Kirim status peminjaman ke view
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Terjadi kesalahan pada server");
+        res.status(500).send('Terjadi kesalahan pada server');
     }
 };
 
@@ -74,21 +71,21 @@ exports.showBookDetail = async (req, res) => {
 exports.showWishlist = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const searchTerm = req.query.search || "";
+        const searchTerm = req.query.search || '';
         const options = { searchTerm };
-
+        
         const books = await Wishlist.findByUser(userId, options);
         const totalBooks = await Wishlist.countByUser(userId, options); // Tambahkan ini
-
-        res.render("member/wishlist", {
-            title: "Wishlist Saya",
+        
+        res.render('member/wishlist', {
+            title: 'Wishlist Saya',
             books,
             count: totalBooks, // Kirim count ke view
-            searchTerm,
+            searchTerm
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Terjadi kesalahan pada server");
+        res.status(500).send('Terjadi kesalahan pada server');
     }
 };
 
@@ -100,10 +97,10 @@ exports.addToWishlist = async (req, res) => {
         await Wishlist.add(userId, bookId);
         // Redirect kembali ke halaman sebelumnya
         // res.redirect('back');
-        res.redirect("/wishlist");
+        res.redirect('/wishlist');
     } catch (error) {
         console.error(error);
-        res.status(500).send("Gagal menambahkan ke wishlist");
+        res.status(500).send('Gagal menambahkan ke wishlist');
     }
 };
 
@@ -113,21 +110,23 @@ exports.removeFromWishlist = async (req, res) => {
         const userId = req.session.user.id;
         const bookId = req.params.id;
         await Wishlist.remove(userId, bookId);
-        res.redirect("/wishlist");
+        res.redirect('/wishlist');
     } catch (error) {
         console.error(error);
-        res.status(500).send("Gagal menghapus dari wishlist");
+        res.status(500).send('Gagal menghapus dari wishlist');
     }
 };
+
+
 
 // Memproses peminjaman buku (DENGAN TRANSAKSI)
 exports.borrowBook = async (req, res) => {
     const userId = req.session.user.id;
     const bookId = req.params.id;
-
+    
     // 1. Dapatkan koneksi dari pool
     const connection = await db.getConnection();
-
+    
     try {
         // 2. Mulai transaksi
         await connection.beginTransaction();
@@ -149,37 +148,39 @@ exports.borrowBook = async (req, res) => {
         // 6. Jika semua berhasil, commit transaksi
         await connection.commit();
 
-        res.redirect("/dipinjam");
+        res.redirect('/dipinjam');
+
     } catch (error) {
         // 7. Jika ada error di tengah jalan, batalkan semua perubahan
         await connection.rollback();
-        console.error("Transaction Error:", error);
-        res.status(500).send("Proses peminjaman gagal.");
+        console.error('Transaction Error:', error);
+        res.status(500).send('Proses peminjaman gagal.');
     } finally {
         // 8. Selalu lepaskan koneksi setelah selesai
         connection.release();
     }
 };
 
+
 // Pastikan fungsi showBorrowedBooks sudah seperti ini
 exports.showBorrowedBooks = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const searchTerm = req.query.search || "";
+        const searchTerm = req.query.search || '';
         const options = { searchTerm };
 
         const books = await Borrowing.findActiveByUser(userId, options);
         const totalBooks = await Borrowing.countActiveByUser(userId, options); // Tambahkan ini
-
-        res.render("member/borrowed", {
-            title: "Buku yang Sedang Dipinjam",
+        
+        res.render('member/borrowed', {
+            title: 'Buku yang Sedang Dipinjam',
             books,
             count: totalBooks, // Kirim count ke view
-            searchTerm,
+            searchTerm
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Terjadi kesalahan pada server");
+        res.status(500).send('Terjadi kesalahan pada server');
     }
 };
 
@@ -187,38 +188,39 @@ exports.showBorrowedBooks = async (req, res) => {
 exports.showBorrowingHistory = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const searchTerm = req.query.search || "";
+        const searchTerm = req.query.search || '';
         const options = { searchTerm };
 
         const books = await Borrowing.findHistoryByUser(userId, options);
         const totalBooks = await Borrowing.countHistoryByUser(userId, options); // Tambahkan ini
-
-        res.render("member/history", {
-            title: "Riwayat Peminjaman",
+        
+        res.render('member/history', {
+            title: 'Riwayat Peminjaman',
             books,
             count: totalBooks, // Kirim count ke view
-            searchTerm,
+            searchTerm
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Terjadi kesalahan pada server");
+        res.status(500).send('Terjadi kesalahan pada server');
     }
 };
+
 
 // Menampilkan halaman profil
 exports.getProfilePage = async (req, res) => {
     try {
         // Ambil data user dari session untuk ditampilkan
         const user = req.session.user;
-        res.render("member/profile", {
-            title: "Profil Saya",
+        res.render('member/profile', {
+            title: 'Profil Saya',
             user,
             success: req.query.success, // Untuk notifikasi sukses
-            error: req.query.error, // Untuk notifikasi error
+            error: req.query.error      // Untuk notifikasi error
         });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Terjadi kesalahan pada server");
+        res.status(500).send('Terjadi kesalahan pada server');
     }
 };
 
@@ -229,28 +231,24 @@ exports.updateProfile = async (req, res) => {
 
     // Validasi dasar
     if (!username || !email) {
-        return res.redirect(
-            "/profil?error=Username dan Email tidak boleh kosong"
-        );
+        return res.redirect('/profil?error=Username dan Email tidak boleh kosong');
     }
 
     try {
         await User.updateProfile(id, username, email);
-
+        
         // Perbarui juga data di session agar header ikut berubah
         req.session.user.username = username;
         req.session.user.email = email;
 
-        res.redirect("/profil?success=Profil berhasil diperbarui");
+        res.redirect('/profil?success=Profil berhasil diperbarui');
     } catch (error) {
         console.error(error);
         // Tangani error jika email sudah terdaftar (dari UNIQUE constraint di DB)
-        if (error.code === "ER_DUP_ENTRY") {
-            return res.redirect(
-                "/profil?error=Email sudah digunakan oleh akun lain"
-            );
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.redirect('/profil?error=Email sudah digunakan oleh akun lain');
         }
-        res.redirect("/profil?error=Gagal memperbarui profil");
+        res.redirect('/profil?error=Gagal memperbarui profil');
     }
 };
 
@@ -261,84 +259,32 @@ exports.changePassword = async (req, res) => {
 
     // 1. Validasi input
     if (newPassword !== confirmPassword) {
-        return res.redirect(
-            "/profil?error=Password baru tidak cocok dengan konfirmasi"
-        );
+        return res.redirect('/profil?error=Password baru tidak cocok dengan konfirmasi');
     }
     if (newPassword.length < 6) {
-        return res.redirect(
-            "/profil?error=Password baru minimal harus 6 karakter"
-        );
+        return res.redirect('/profil?error=Password baru minimal harus 6 karakter');
     }
 
     try {
         // 2. Ambil data user lengkap dari DB (termasuk hash password saat ini)
         const user = await User.findById(id);
         if (!user) {
-            return res.redirect("/login"); // Sesi tidak valid
+            return res.redirect('/login'); // Sesi tidak valid
         }
 
         // 3. Verifikasi password saat ini
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            return res.redirect("/profil?error=Password saat ini salah");
+            return res.redirect('/profil?error=Password saat ini salah');
         }
 
         // 4. Hash password baru dan simpan
         const hashedPassword = await bcrypt.hash(newPassword, 12);
         await User.updatePassword(id, hashedPassword);
 
-        res.redirect("/profil?success=Password berhasil diubah");
+        res.redirect('/profil?success=Password berhasil diubah');
     } catch (error) {
         console.error(error);
-        res.redirect("/profil?error=Gagal mengubah password");
-    }
-};
-
-// GANTI SELURUH FUNGSI LAMA DENGAN FUNGSI BARU DI BAWAH INI
-exports.downloadHistoryPDF = async (req, res) => {
-    try {
-        const userId = req.session.user.id; // Menggunakan .id yang sudah benar
-
-        // 1. Ambil data user DAN riwayat peminjaman MENGGUNAKAN FUNGSI YANG BENAR
-        const user = await User.findById(userId);
-        const borrowings = await Borrowing.findHistoryByUser(userId); // <-- INI PERBAIKAN UTAMANYA
-
-        // Cek jika user tidak ditemukan
-        if (!user) {
-            // Seharusnya tidak terjadi jika sudah login, tapi ini pengaman
-            return res.status(404).send('Pengguna tidak ditemukan');
-        }
-
-        // 2. Render template EJS menjadi string HTML
-        const templatePath = path.join(__dirname, '..', 'views', 'laporan', 'riwayat-peminjaman.ejs');
-        const html = await ejs.renderFile(templatePath, { user, borrowings }); // Kirim data ke template
-
-        // 3. Proses Puppeteer (ini sudah benar)
-        const browser = await puppeteer.launch({ 
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
-        });
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
-
-        // 4. Generate PDF
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: { top: '25px', right: '25px', bottom: '25px', left: '25px' }
-        });
-
-        await browser.close();
-
-        // 5. Kirim PDF ke browser untuk diunduh
-        const filename = `Riwayat_Peminjaman_${user.username.replace(/\s+/g, '_')}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
-        res.send(pdfBuffer);
-
-    } catch (error) {
-        console.error('Error saat membuat PDF:', error);
-        res.status(500).send('Gagal membuat laporan PDF.');
+        res.redirect('/profil?error=Gagal mengubah password');
     }
 };
