@@ -5,13 +5,13 @@ Sistem Perpustakaan adalah sebuah aplikasi perpustakaan yang dibuat menggunakan 
 ## Screenshots
 
 ### Login Page
-![Screenshot of Login Page](https://github.com/bagusmaulanahasan/public/sreenshots/login-page.png)
+![Screenshot of Login Page](https://github.com/bagusmaulanahasan/sistem_perpustakaan/blob/main/public/screenshots/login-page.png)
 
 ### Member Pages
-![Screenshot of Member Pages](https://github.com/bagusmaulanahasan/public/sreenshots/member-pages.png)
+![Screenshot of Member Pages](https://github.com/bagusmaulanahasan/sistem_perpustakaan/blob/main/public/screenshots/member-pages.png)
 
 ### Admin Pages
-![Screenshot of Admin Pages](https://github.com/bagusmaulanahasan/public/sreenshots/admin-pages.png)
+![Screenshot of Admin Pages](https://github.com/bagusmaulanahasan/sistem_perpustakaan/blob/main/public/screenshots/admin-pages.png)
 
 ## Cara Menjalankan Project
 
