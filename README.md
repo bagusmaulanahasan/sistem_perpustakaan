@@ -17,7 +17,7 @@ Sistem Perpustakaan adalah sebuah aplikasi perpustakaan yang dibuat menggunakan 
 
 1. Clone repository dengan perintah: 
 ```bash
-git clone https://github.com/bagusmaulanahasan/sistem-perpustakaan
+git clone https://github.com/bagusmaulanahasan/sistem_perpustakaan
 ```
 2. Import database dengan nama `db_pinjam_buku`
 3. Sesuaikan username dan password mysql lewat file `.env`
