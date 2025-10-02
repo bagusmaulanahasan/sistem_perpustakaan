@@ -7,16 +7,20 @@ const User = require('../models/userModel'); // Pastikan User model sudah diimpo
 const bcrypt = require('bcryptjs');      // Impor bcrypt untuk password
 
 // Menampilkan halaman katalog buku
-// Ganti fungsi showCatalog Anda dengan ini
 exports.showCatalog = async (req, res) => {
     try {
-        const { kategori } = req.query;
+        const searchTerm = req.query.search || '';
+        const categoryId = req.query.kategori || '';
         let books;
 
-        if (kategori) {
-            books = await Book.findByCategory(kategori);
+        const options = { searchTerm };
+
+        if (categoryId) {
+            // Jika ada filter kategori, cari buku di kategori tersebut
+            books = await Book.findByCategory(categoryId, options);
         } else {
-            books = await Book.findAll();
+            // Jika tidak, cari di semua buku
+            books = await Book.findAll(options);
         }
         
         const categories = await Category.findAll();
@@ -25,7 +29,8 @@ exports.showCatalog = async (req, res) => {
             title: 'Katalog Buku',
             books,
             categories,
-            selectedCategory: kategori
+            selectedCategory: categoryId,
+            searchTerm // Kirim searchTerm ke view
         });
 
     } catch (error) {
@@ -33,7 +38,6 @@ exports.showCatalog = async (req, res) => {
         res.status(500).send('Terjadi kesalahan pada server');
     }
 };
-
 // Menampilkan halaman detail satu buku
 exports.showBookDetail = async (req, res) => {
     try {
