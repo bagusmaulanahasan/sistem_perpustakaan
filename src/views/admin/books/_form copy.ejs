@@ -58,7 +58,7 @@
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            imagePreview.classList.remove('hidden'); // Tampilkan elemen img
+            imagePreview.classList.remove('hidden'); 
             
             reader.addEventListener('load', function() {
                 imagePreview.setAttribute('src', this.result);
@@ -66,7 +66,7 @@
             
             reader.readAsDataURL(file);
         } else {
-            imagePreview.classList.add('hidden'); // Sembunyikan jika tidak ada file dipilih
+            imagePreview.classList.add('hidden'); 
             imagePreview.setAttribute('src', '#');
         }
     });

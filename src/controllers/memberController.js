@@ -4,13 +4,12 @@ const ejs = require("ejs");
 
 const Book = require("../models/bookModel");
 const Category = require("../models/categoryModel");
-const Wishlist = require("../models/wishlistModel"); // <-- Tambahkan ini di atas
-const Borrowing = require("../models/borrowingModel"); // <-- Impor model baru
-const db = require("../config/database"); // <-- Impor pool database untuk transaksi
-const User = require("../models/userModel"); // Pastikan User model sudah diimpor
-const bcrypt = require("bcryptjs"); // Impor bcrypt untuk password
+const Wishlist = require("../models/wishlistModel");
+const Borrowing = require("../models/borrowingModel");
+const db = require("../config/database");
+const User = require("../models/userModel");
+const bcrypt = require("bcryptjs");
 
-// GANTI FUNGSI showCatalog
 exports.showCatalog = async (req, res) => {
     try {
         const searchTerm = req.query.search || "";
@@ -20,10 +19,8 @@ exports.showCatalog = async (req, res) => {
         const findOptions = { searchTerm, categoryId };
         const countOptions = { searchTerm, categoryId };
 
-        // Logika untuk findByCategory tidak ada di model yang di-rollback,
-        // jadi kita sederhanakan panggilannya ke findAll saja.
         books = await Book.findAll(findOptions);
-        const totalBooks = await Book.countAll(countOptions); // Panggil fungsi count
+        const totalBooks = await Book.countAll(countOptions);
 
         const categories = await Category.findAll();
 
@@ -31,7 +28,7 @@ exports.showCatalog = async (req, res) => {
             title: "Katalog Buku",
             books,
             categories,
-            count: totalBooks, // Kirim count ke view
+            count: totalBooks,
             selectedCategory: categoryId,
             searchTerm,
         });
@@ -41,13 +38,11 @@ exports.showCatalog = async (req, res) => {
     }
 };
 
-// GANTI FUNGSI showBookDetail DENGAN INI
 exports.showBookDetail = async (req, res) => {
     try {
         const bookId = req.params.id;
         const userId = req.session.user.id;
 
-        // Ambil data buku dan statusnya secara bersamaan untuk efisiensi
         const [book, isInWishlist, isBorrowed] = await Promise.all([
             Book.findById(bookId),
             Wishlist.check(userId, bookId),
@@ -61,8 +56,8 @@ exports.showBookDetail = async (req, res) => {
         res.render("member/detail", {
             title: book.title,
             book,
-            isInWishlist, // Kirim status wishlist ke view
-            isBorrowed, // Kirim status peminjaman ke view
+            isInWishlist,
+            isBorrowed,
         });
     } catch (error) {
         console.error(error);
@@ -70,7 +65,6 @@ exports.showBookDetail = async (req, res) => {
     }
 };
 
-// GANTI FUNGSI showWishlist
 exports.showWishlist = async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -78,12 +72,12 @@ exports.showWishlist = async (req, res) => {
         const options = { searchTerm };
 
         const books = await Wishlist.findByUser(userId, options);
-        const totalBooks = await Wishlist.countByUser(userId, options); // Tambahkan ini
+        const totalBooks = await Wishlist.countByUser(userId, options);
 
         res.render("member/wishlist", {
             title: "Wishlist Saya",
             books,
-            count: totalBooks, // Kirim count ke view
+            count: totalBooks,
             searchTerm,
         });
     } catch (error) {
@@ -92,14 +86,12 @@ exports.showWishlist = async (req, res) => {
     }
 };
 
-// Menambahkan buku ke wishlist
 exports.addToWishlist = async (req, res) => {
     try {
         const userId = req.session.user.id;
         const bookId = req.params.id;
         await Wishlist.add(userId, bookId);
-        // Redirect kembali ke halaman sebelumnya
-        // res.redirect('back');
+
         res.redirect("/wishlist");
     } catch (error) {
         console.error(error);
@@ -107,7 +99,6 @@ exports.addToWishlist = async (req, res) => {
     }
 };
 
-// Menghapus buku dari wishlist
 exports.removeFromWishlist = async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -120,48 +111,38 @@ exports.removeFromWishlist = async (req, res) => {
     }
 };
 
-// Memproses peminjaman buku (DENGAN TRANSAKSI)
 exports.borrowBook = async (req, res) => {
     const userId = req.session.user.id;
     const bookId = req.params.id;
 
-    // 1. Dapatkan koneksi dari pool
     const connection = await db.getConnection();
 
     try {
-        // 2. Mulai transaksi
         await connection.beginTransaction();
 
-        // 3. Cek stok buku
         const book = await Book.findById(bookId, connection);
         if (!book || book.stock <= 0) {
-            await connection.rollback(); // Batalkan transaksi jika stok habis
-            // Tambahkan flash message untuk error jika ada
+            await connection.rollback();
+
             return res.redirect(`/buku/${bookId}`);
         }
 
-        // 4. Kurangi stok buku
         await Book.decreaseStock(bookId, connection);
 
-        // 5. Buat catatan peminjaman
         await Borrowing.create(userId, bookId, connection);
 
-        // 6. Jika semua berhasil, commit transaksi
         await connection.commit();
 
         res.redirect("/dipinjam");
     } catch (error) {
-        // 7. Jika ada error di tengah jalan, batalkan semua perubahan
         await connection.rollback();
         console.error("Transaction Error:", error);
         res.status(500).send("Proses peminjaman gagal.");
     } finally {
-        // 8. Selalu lepaskan koneksi setelah selesai
         connection.release();
     }
 };
 
-// Pastikan fungsi showBorrowedBooks sudah seperti ini
 exports.showBorrowedBooks = async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -169,12 +150,12 @@ exports.showBorrowedBooks = async (req, res) => {
         const options = { searchTerm };
 
         const books = await Borrowing.findActiveByUser(userId, options);
-        const totalBooks = await Borrowing.countActiveByUser(userId, options); // Tambahkan ini
+        const totalBooks = await Borrowing.countActiveByUser(userId, options);
 
         res.render("member/borrowed", {
             title: "Buku yang Sedang Dipinjam",
             books,
-            count: totalBooks, // Kirim count ke view
+            count: totalBooks,
             searchTerm,
         });
     } catch (error) {
@@ -183,7 +164,6 @@ exports.showBorrowedBooks = async (req, res) => {
     }
 };
 
-// GANTI FUNGSI showBorrowingHistory dengan ini
 exports.showBorrowingHistory = async (req, res) => {
     try {
         const userId = req.session.user.id;
@@ -191,12 +171,12 @@ exports.showBorrowingHistory = async (req, res) => {
         const options = { searchTerm };
 
         const books = await Borrowing.findHistoryByUser(userId, options);
-        const totalBooks = await Borrowing.countHistoryByUser(userId, options); // Tambahkan ini
+        const totalBooks = await Borrowing.countHistoryByUser(userId, options);
 
         res.render("member/history", {
             title: "Riwayat Peminjaman",
             books,
-            count: totalBooks, // Kirim count ke view
+            count: totalBooks,
             searchTerm,
         });
     } catch (error) {
@@ -205,16 +185,14 @@ exports.showBorrowingHistory = async (req, res) => {
     }
 };
 
-// Menampilkan halaman profil
 exports.getProfilePage = async (req, res) => {
     try {
-        // Ambil data user dari session untuk ditampilkan
         const user = req.session.user;
         res.render("member/profile", {
             title: "Profil Saya",
             user,
-            success: req.query.success, // Untuk notifikasi sukses
-            error: req.query.error, // Untuk notifikasi error
+            success: req.query.success,
+            error: req.query.error,
         });
     } catch (error) {
         console.error(error);
@@ -222,12 +200,10 @@ exports.getProfilePage = async (req, res) => {
     }
 };
 
-// Memproses update profil (username & email)
 exports.updateProfile = async (req, res) => {
     const { id } = req.session.user;
     const { username, email } = req.body;
 
-    // Validasi dasar
     if (!username || !email) {
         return res.redirect(
             "/profil?error=Username dan Email tidak boleh kosong"
@@ -237,14 +213,13 @@ exports.updateProfile = async (req, res) => {
     try {
         await User.updateProfile(id, username, email);
 
-        // Perbarui juga data di session agar header ikut berubah
         req.session.user.username = username;
         req.session.user.email = email;
 
         res.redirect("/profil?success=Profil berhasil diperbarui");
     } catch (error) {
         console.error(error);
-        // Tangani error jika email sudah terdaftar (dari UNIQUE constraint di DB)
+
         if (error.code === "ER_DUP_ENTRY") {
             return res.redirect(
                 "/profil?error=Email sudah digunakan oleh akun lain"
@@ -254,12 +229,10 @@ exports.updateProfile = async (req, res) => {
     }
 };
 
-// Memproses perubahan password
 exports.changePassword = async (req, res) => {
     const { id } = req.session.user;
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    // 1. Validasi input
     if (newPassword !== confirmPassword) {
         return res.redirect(
             "/profil?error=Password baru tidak cocok dengan konfirmasi"
@@ -272,19 +245,16 @@ exports.changePassword = async (req, res) => {
     }
 
     try {
-        // 2. Ambil data user lengkap dari DB (termasuk hash password saat ini)
         const user = await User.findById(id);
         if (!user) {
-            return res.redirect("/login"); // Sesi tidak valid
+            return res.redirect("/login");
         }
 
-        // 3. Verifikasi password saat ini
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.redirect("/profil?error=Password saat ini salah");
         }
 
-        // 4. Hash password baru dan simpan
         const hashedPassword = await bcrypt.hash(newPassword, 12);
         await User.updatePassword(id, hashedPassword);
 
@@ -295,50 +265,58 @@ exports.changePassword = async (req, res) => {
     }
 };
 
-// GANTI SELURUH FUNGSI LAMA DENGAN FUNGSI BARU DI BAWAH INI
 exports.downloadHistoryPDF = async (req, res) => {
     try {
-        const userId = req.session.user.id; // Menggunakan .id yang sudah benar
+        const userId = req.session.user.id;
 
-        // 1. Ambil data user DAN riwayat peminjaman MENGGUNAKAN FUNGSI YANG BENAR
         const user = await User.findById(userId);
-        const borrowings = await Borrowing.findHistoryByUser(userId); // <-- INI PERBAIKAN UTAMANYA
+        const borrowings = await Borrowing.findHistoryByUser(userId);
 
-        // Cek jika user tidak ditemukan
         if (!user) {
-            // Seharusnya tidak terjadi jika sudah login, tapi ini pengaman
-            return res.status(404).send('Pengguna tidak ditemukan');
+            return res.status(404).send("Pengguna tidak ditemukan");
         }
 
-        // 2. Render template EJS menjadi string HTML
-        const templatePath = path.join(__dirname, '..', 'views', 'laporan', 'riwayat-peminjaman.ejs');
-        const html = await ejs.renderFile(templatePath, { user, borrowings }); // Kirim data ke template
+        const templatePath = path.join(
+            __dirname,
+            "..",
+            "views",
+            "laporan",
+            "riwayat-peminjaman.ejs"
+        );
+        const html = await ejs.renderFile(templatePath, { user, borrowings });
 
-        // 3. Proses Puppeteer (ini sudah benar)
-        const browser = await puppeteer.launch({ 
+        const browser = await puppeteer.launch({
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
         });
         const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.setContent(html, { waitUntil: "networkidle0" });
 
-        // 4. Generate PDF
         const pdfBuffer = await page.pdf({
-            format: 'A4',
+            format: "A4",
             printBackground: true,
-            margin: { top: '25px', right: '25px', bottom: '25px', left: '25px' }
+            margin: {
+                top: "25px",
+                right: "25px",
+                bottom: "25px",
+                left: "25px",
+            },
         });
 
         await browser.close();
 
-        // 5. Kirim PDF ke browser untuk diunduh
-        const filename = `Riwayat_Peminjaman_${user.username.replace(/\s+/g, '_')}.pdf`;
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+        const filename = `Riwayat_Peminjaman_${user.username.replace(
+            /\s+/g,
+            "_"
+        )}.pdf`;
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=${filename}`
+        );
         res.send(pdfBuffer);
-
     } catch (error) {
-        console.error('Error saat membuat PDF:', error);
-        res.status(500).send('Gagal membuat laporan PDF.');
+        console.error("Error saat membuat PDF:", error);
+        res.status(500).send("Gagal membuat laporan PDF.");
     }
 };

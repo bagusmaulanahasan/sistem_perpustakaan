@@ -1,36 +1,26 @@
-// Di file: src/routes/adminRoutes.js
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// Impor middleware dan controller yang dibutuhkan (TANPA bookController)
-const { isLoggedIn, isAdmin } = require('../middleware/authMiddleware');
-const categoryController = require('../controllers/categoryController');
-const adminController = require('../controllers/adminController');
+const { isLoggedIn, isAdmin } = require("../middleware/authMiddleware");
+const categoryController = require("../controllers/categoryController");
+const adminController = require("../controllers/adminController");
 
-// Lindungi semua rute admin dengan middleware
 router.use(isLoggedIn, isAdmin);
 
-// Rute Home Admin
-router.get('/', (req, res) => res.redirect('/admin/books')); // Ini tetap karena ini rute utama admin
+router.get("/", (req, res) => res.redirect("/admin/books"));
 
-// Rute Kategori (TIDAK BERUBAH)
-router.get('/categories', categoryController.listCategories);
-router.get('/categories/new', categoryController.getCreatePage);
-router.post('/categories', categoryController.postCreateCategory);
-router.get('/categories/edit/:id', categoryController.getEditPage);
-router.post('/categories/update/:id', categoryController.postUpdateCategory);
-router.post('/categories/delete/:id', categoryController.postDeleteCategory);
+router.get("/categories", categoryController.listCategories);
+router.get("/categories/new", categoryController.getCreatePage);
+router.post("/categories", categoryController.postCreateCategory);
+router.get("/categories/edit/:id", categoryController.getEditPage);
+router.post("/categories/update/:id", categoryController.postUpdateCategory);
+router.post("/categories/delete/:id", categoryController.postDeleteCategory);
 
-// RUTE-RUTE BUKU DIHAPUS DARI SINI KARENA SUDAH ADA DI bookRoutes.js
+router.get("/borrowings", adminController.showBorrowedList);
+router.post("/borrowings/return/:id", adminController.returnBook);
+router.get("/borrowings/download", adminController.downloadActiveBorrowsPDF);
 
-// Rute Peminjaman (TIDAK BERUBAH)
-router.get('/borrowings', adminController.showBorrowedList);
-router.post('/borrowings/return/:id', adminController.returnBook);
-router.get('/borrowings/download', adminController.downloadActiveBorrowsPDF);
-
-// Rute Riwayat Peminjaman (TIDAK BERUBAH)
-router.get('/history', adminController.showHistoryList);
-router.get('/history/download', adminController.downloadHistoryPDF);
+router.get("/history", adminController.showHistoryList);
+router.get("/history/download", adminController.downloadHistoryPDF);
 
 module.exports = router;

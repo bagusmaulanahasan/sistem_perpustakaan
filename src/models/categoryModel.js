@@ -1,38 +1,36 @@
-const db = require('../config/database');
+const db = require("../config/database");
 
 const Category = {
     create: async (name) => {
         const [result] = await db.execute(
-            'INSERT INTO `categories` (`name`) VALUES (?)',
+            "INSERT INTO `categories` (`name`) VALUES (?)",
             [name]
         );
         return result.insertId;
     },
 
-    // GANTI FUNGSI findAll DENGAN INI
     findAll: async (options = {}) => {
         const { searchTerm } = options;
-        let query = 'SELECT * FROM `categories`';
+        let query = "SELECT * FROM `categories`";
         const params = [];
 
         if (searchTerm) {
-            query += ' WHERE `name` LIKE ?';
+            query += " WHERE `name` LIKE ?";
             params.push(`%${searchTerm}%`);
         }
 
-        query += ' ORDER BY `name` ASC';
+        query += " ORDER BY `name` ASC";
         const [rows] = await db.execute(query, params);
         return rows;
     },
 
-    // FUNGSI BARU UNTUK MENGHITUNG TOTAL
     countAll: async (options = {}) => {
         const { searchTerm } = options;
-        let query = 'SELECT COUNT(*) as total FROM `categories`';
+        let query = "SELECT COUNT(*) as total FROM `categories`";
         const params = [];
-        
+
         if (searchTerm) {
-            query += ' WHERE `name` LIKE ?';
+            query += " WHERE `name` LIKE ?";
             params.push(`%${searchTerm}%`);
         }
 
@@ -41,22 +39,28 @@ const Category = {
     },
 
     findById: async (id) => {
-        const [rows] = await db.execute('SELECT * FROM `categories` WHERE `id` = ?', [id]);
+        const [rows] = await db.execute(
+            "SELECT * FROM `categories` WHERE `id` = ?",
+            [id]
+        );
         return rows[0];
     },
 
     update: async (id, name) => {
         const [result] = await db.execute(
-            'UPDATE `categories` SET `name` = ? WHERE `id` = ?',
+            "UPDATE `categories` SET `name` = ? WHERE `id` = ?",
             [name, id]
         );
         return result.affectedRows;
     },
 
     remove: async (id) => {
-        const [result] = await db.execute('DELETE FROM `categories` WHERE `id` = ?', [id]);
+        const [result] = await db.execute(
+            "DELETE FROM `categories` WHERE `id` = ?",
+            [id]
+        );
         return result.affectedRows;
-    }
+    },
 };
 
 module.exports = Category;

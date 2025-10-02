@@ -1,9 +1,7 @@
 const db = require("../config/database");
 
 const Wishlist = {
-    // Menambahkan item ke wishlist
     add: async (userId, bookId) => {
-        // Menggunakan INSERT IGNORE agar tidak error jika data sudah ada (karena UNIQUE key di DB)
         const [result] = await db.execute(
             "INSERT IGNORE INTO `wishlists` (`user_id`, `book_id`) VALUES (?, ?)",
             [userId, bookId]
@@ -11,7 +9,6 @@ const Wishlist = {
         return result.affectedRows;
     },
 
-    // GANTI FUNGSI findByUser YANG LAMA DENGAN INI
     findByUser: async (userId, options = {}) => {
         const { searchTerm } = options;
 
@@ -47,7 +44,6 @@ const Wishlist = {
         return rows;
     },
 
-    // Menghapus item dari wishlist
     remove: async (userId, bookId) => {
         const [result] = await db.execute(
             "DELETE FROM `wishlists` WHERE `user_id` = ? AND `book_id` = ?",
@@ -56,7 +52,6 @@ const Wishlist = {
         return result.affectedRows;
     },
 
-    // FUNGSI BARU UNTUK MENGHITUNG TOTAL WISHLIST
     countByUser: async (userId, options = {}) => {
         const { searchTerm } = options;
         let query = `
@@ -78,13 +73,12 @@ const Wishlist = {
         return rows[0].total;
     },
 
-    // FUNGSI BARU: Cek apakah buku sudah ada di wishlist user
     check: async (userId, bookId) => {
         const [rows] = await db.execute(
             "SELECT id FROM wishlists WHERE user_id = ? AND book_id = ? LIMIT 1",
             [userId, bookId]
         );
-        return rows.length > 0; // Return true jika ada, false jika tidak
+        return rows.length > 0;
     },
 };
 

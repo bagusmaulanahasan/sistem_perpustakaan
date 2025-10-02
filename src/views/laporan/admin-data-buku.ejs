@@ -1,63 +1,96 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Laporan Data Buku Perpustakaan</title>
-    <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10px; color: #333; }
-        .container { width: 100%; margin: 0 auto; padding: 25px; }
-        .header { text-align: center; border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 30px; }
-        .header h1 { margin: 0; font-size: 20px; }
-        .header p { margin: 5px 0 0; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 7px; text-align: left; }
-        thead { background-color: #f2f2f2; }
-        .no-data { text-align: center; padding: 20px; font-style: italic; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Laporan Lengkap Data Buku</h1>
-            <%
-              const dateOptions = { day: '2-digit', month: 'long', year: 'numeric' };
-              const formattedDate = new Date().toLocaleDateString('id-ID', dateOptions);
-            %>
-            <p>Diunduh pada: <%= formattedDate %></p>
-        </div>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Laporan Data Buku Perpustakaan</title>
+        <style>
+            body {
+                font-family: "Helvetica", "Arial", sans-serif;
+                font-size: 10px;
+                color: #333;
+            }
+            .container {
+                width: 100%;
+                margin: 0 auto;
+                padding: 25px;
+            }
+            .header {
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 15px;
+                margin-bottom: 30px;
+            }
+            .header h1 {
+                margin: 0;
+                font-size: 20px;
+            }
+            .header p {
+                margin: 5px 0 0;
+                font-size: 12px;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            th,
+            td {
+                border: 1px solid #ccc;
+                padding: 7px;
+                text-align: left;
+            }
+            thead {
+                background-color: #f2f2f2;
+            }
+            .no-data {
+                text-align: center;
+                padding: 20px;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Laporan Lengkap Data Buku</h1>
+                <% const dateOptions = { day: '2-digit', month: 'long', year:
+                'numeric' }; const formattedDate = new
+                Date().toLocaleDateString('id-ID', dateOptions); %>
+                <p>Diunduh pada: <%= formattedDate %></p>
+            </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Judul Buku</th>
-                    <th>Penulis</th>
-                    <th>Penerbit</th>
-                    <th>Tahun</th>
-                    <th>Kategori</th>
-                    <th>Stok</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if(books.length > 0) { %>
-                    <% books.forEach((book, index) => { %>
-                        <tr>
-                            <td><%= index + 1 %></td>
-                            <td><%= book.title %></td>
-                            <td><%= book.author %></td>
-                            <td><%= book.publisher %></td>
-                            <td><%= book.publication_year %></td>
-                            <td><%= book.category_name || 'Tanpa Kategori' %></td>
-                            <td><%= book.stock %></td>
-                        </tr>
-                    <% }) %>
-                <% } else { %>
+            <table>
+                <thead>
                     <tr>
-                        <td colspan="7" class="no-data">Tidak ada data buku di perpustakaan.</td>
+                        <th>No.</th>
+                        <th>Judul Buku</th>
+                        <th>Penulis</th>
+                        <th>Penerbit</th>
+                        <th>Tahun</th>
+                        <th>Kategori</th>
+                        <th>Stok</th>
                     </tr>
-                <% } %>
-            </tbody>
-        </table>
-    </div>
-</body>
+                </thead>
+                <tbody>
+                    <% if(books.length > 0) { %> <% books.forEach((book, index)
+                    => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= book.title %></td>
+                        <td><%= book.author %></td>
+                        <td><%= book.publisher %></td>
+                        <td><%= book.publication_year %></td>
+                        <td><%= book.category_name || 'Tanpa Kategori' %></td>
+                        <td><%= book.stock %></td>
+                    </tr>
+                    <% }) %> <% } else { %>
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            Tidak ada data buku di perpustakaan.
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </body>
 </html>

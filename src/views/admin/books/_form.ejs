@@ -58,30 +58,30 @@
     const fileError = document.getElementById('fileError');
 
     coverImageInput.addEventListener('change', function() {
-        // Bersihkan pesan error sebelumnya
+        
         fileError.textContent = '';
 
         const file = this.files[0];
         if (file) {
-            // Validasi Tipe File
+            
             const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
                 fileError.textContent = 'Tipe file tidak valid. Harap pilih file gambar.';
-                this.value = ''; // Reset input file
+                this.value = ''; 
                 imagePreview.classList.add('hidden');
                 return;
             }
 
-            // Validasi Ukuran File (2MB)
+            
             const maxSizeInBytes = 2 * 1024 * 1024;
             if (file.size > maxSizeInBytes) {
                 fileError.textContent = 'Ukuran file terlalu besar. Maksimal 2MB.';
-                this.value = ''; // Reset input file
+                this.value = ''; 
                 imagePreview.classList.add('hidden');
                 return;
             }
 
-            // Jika valid, tampilkan preview
+            
             const reader = new FileReader();
             imagePreview.classList.remove('hidden');
             

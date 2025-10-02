@@ -1,8 +1,6 @@
-// src/controllers/authController.js
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 
-// Menampilkan halaman registrasi
 exports.getRegisterPage = (req, res) => {
     res.render("register", {
         title: "Register",
@@ -11,12 +9,10 @@ exports.getRegisterPage = (req, res) => {
     });
 };
 
-// Memproses data registrasi
 exports.postRegister = async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
-        // 1. Cek apakah emaiusernamel sudah terdaftar
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
             return res.render("register", {
@@ -26,13 +22,10 @@ exports.postRegister = async (req, res) => {
             });
         }
 
-        // 2. Hash password
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        // 3. Simpan user baru ke database
         await User.create(username, email, hashedPassword);
 
-        // 4. Redirect ke halaman login dengan pesan sukses
         res.redirect("/login?success=registrasi");
     } catch (error) {
         console.error(error);
@@ -44,7 +37,6 @@ exports.postRegister = async (req, res) => {
     }
 };
 
-// Menampilkan halaman login
 exports.getLoginPage = (req, res) => {
     const successMessage =
         req.query.success === "registrasi"
@@ -58,12 +50,10 @@ exports.getLoginPage = (req, res) => {
     });
 };
 
-// Memproses data login
 exports.postLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // 1. Cari user berdasarkan email
         const user = await User.findByEmail(email);
         if (!user) {
             return res.render("login", {
@@ -74,7 +64,6 @@ exports.postLogin = async (req, res) => {
             });
         }
 
-        // 2. Bandingkan password yang diinput dengan yang ada di DB
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.render("login", {
@@ -85,7 +74,6 @@ exports.postLogin = async (req, res) => {
             });
         }
 
-        // 3. Buat session untuk user
         req.session.isLoggedIn = true;
         req.session.user = {
             id: user.id,
@@ -94,9 +82,7 @@ exports.postLogin = async (req, res) => {
             role: user.role,
         };
 
-        
-        // 4. Redirect ke halaman utama (misal: /books)
-        return res.redirect("/books"); // Ganti dengan rute halaman utama Anda nanti
+        return res.redirect("/books");
     } catch (error) {
         console.error(error);
         res.render("login", {
@@ -108,7 +94,6 @@ exports.postLogin = async (req, res) => {
     }
 };
 
-// Proses Logout
 exports.logout = (req, res) => {
     req.session.destroy((err) => {
         if (err) {

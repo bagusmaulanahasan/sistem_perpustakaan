@@ -1,10 +1,8 @@
 const db = require("../config/database");
-const Book = require("./bookModel"); // Impor Book model untuk akses increaseStoc
+const Book = require("./bookModel");
 
 const Borrowing = {
-    // Membuat catatan peminjaman baru
     create: async (userId, bookId, connection) => {
-        // Asumsi durasi pinjam adalah 14 hari
         const borrowDate = new Date();
         const dueDate = new Date();
         dueDate.setDate(borrowDate.getDate() + 14);
@@ -12,7 +10,6 @@ const Borrowing = {
         const sql =
             "INSERT INTO borrowings (user_id, book_id, borrow_date, due_date) VALUES (?, ?, ?, ?)";
 
-        // Menggunakan koneksi yang di-passing untuk transaction
         await (connection || db).execute(sql, [
             userId,
             bookId,
@@ -21,7 +18,6 @@ const Borrowing = {
         ]);
     },
 
-    // Menampilkan buku yang sedang dipinjam oleh user
     findActiveByUser: async (userId, options = {}) => {
         const { searchTerm } = options;
         let query = `
@@ -82,7 +78,6 @@ const Borrowing = {
         return rows;
     },
 
-    // GANTI FUNGSI findHistoryByUser
     findHistoryByUser: async (userId, options = {}) => {
         const { searchTerm } = options;
         let query = `
@@ -143,7 +138,6 @@ const Borrowing = {
         return rows;
     },
 
-    // FUNGSI BARU: Menampilkan semua buku yang sedang dipinjam (untuk admin) dengan filter pencarian
     findActiveWithSearch: async (searchTerm) => {
         let query = `
             SELECT
@@ -190,7 +184,6 @@ const Borrowing = {
         return rows;
     },
 
-    // FUNGSI BARU: Menampilkan riwayat buku yang sudah dikembalikan dengan filter pencarian
     findHistoryWithSearch: async (searchTerm) => {
         let query = `
             SELECT
@@ -231,19 +224,17 @@ const Borrowing = {
             );
         }
 
-        query += ` ORDER BY br.return_date DESC`; // Urutkan berdasarkan tanggal kembali
+        query += ` ORDER BY br.return_date DESC`;
 
         const [rows] = await db.execute(query, params);
         return rows;
     },
 
-    // FUNGSI BARU: Memproses pengembalian buku (dengan transaksi)
     processReturn: async (borrowingId) => {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
 
-            // 1. Dapatkan book_id dari borrowingId
             const [borrowRows] = await connection.execute(
                 "SELECT book_id FROM borrowings WHERE id = ? AND return_date IS NULL",
                 [borrowingId]
@@ -255,30 +246,24 @@ const Borrowing = {
             }
             const bookId = borrowRows[0].book_id;
 
-            // 2. Update tanggal pengembalian di tabel borrowings
             await connection.execute(
                 "UPDATE borrowings SET return_date = CURDATE() WHERE id = ?",
                 [borrowingId]
             );
 
-            // 3. Tambah stok buku di tabel books
             await Book.increaseStock(bookId, connection);
 
-            // 4. Jika semua berhasil, commit transaksi
             await connection.commit();
             return { success: true };
         } catch (error) {
-            // 5. Jika ada error, batalkan semua perubahan
             await connection.rollback();
             console.error("Transaction Error in processReturn:", error);
             return { success: false, error: error.message };
         } finally {
-            // 6. Selalu lepaskan koneksi
             connection.release();
         }
     },
 
-    // FUNGSI BARU: Menghitung buku yang sedang dipinjam oleh user
     countActiveByUser: async (userId, options = {}) => {
         const { searchTerm } = options;
         let query = `
@@ -291,7 +276,6 @@ const Borrowing = {
         const params = [userId];
 
         if (searchTerm) {
-            // ... (logika pencarian tanggal dan teks sama seperti findActiveByUser)
             const likeTerm = `%${searchTerm}%`;
             const searchNumber = parseInt(searchTerm);
             query += ` AND (`;
@@ -336,7 +320,6 @@ const Borrowing = {
         return rows[0].total;
     },
 
-    // FUNGSI BARU: Menghitung riwayat peminjaman user
     countHistoryByUser: async (userId, options = {}) => {
         const { searchTerm } = options;
         let query = `
@@ -349,7 +332,6 @@ const Borrowing = {
         const params = [userId];
 
         if (searchTerm) {
-            // ... (logika pencarian tanggal dan teks sama seperti findHistoryByUser)
             const likeTerm = `%${searchTerm}%`;
             const searchNumber = parseInt(searchTerm);
             query += ` AND (`;
@@ -394,16 +376,14 @@ const Borrowing = {
         return rows[0].total;
     },
 
-    // FUNGSI BARU: Cek apakah user sedang meminjam buku spesifik
     isCurrentlyBorrowed: async (userId, bookId) => {
         const [rows] = await db.execute(
             "SELECT id FROM borrowings WHERE user_id = ? AND book_id = ? AND return_date IS NULL LIMIT 1",
             [userId, bookId]
         );
-        return rows.length > 0; // Return true jika sedang dipinjam, false jika tidak
+        return rows.length > 0;
     },
 
-        // FUNGSI BARU: Mengambil semua riwayat untuk laporan PDF, diurutkan berdasarkan nama user
     findAllHistorySortedByUsername: async () => {
         const query = `
             SELECT
@@ -419,13 +399,11 @@ const Borrowing = {
             WHERE br.return_date IS NOT NULL
             ORDER BY u.username ASC, br.return_date DESC
         `;
-        // Urutkan berdasarkan username, lalu tanggal kembali untuk setiap user
 
         const [rows] = await db.execute(query);
         return rows;
     },
 
-        // FUNGSI BARU: Mengambil semua peminjaman AKTIF untuk laporan PDF, diurutkan berdasarkan nama user
     findAllActiveSortedByUsername: async () => {
         const query = `
             SELECT
@@ -441,7 +419,6 @@ const Borrowing = {
             WHERE br.return_date IS NULL
             ORDER BY u.username ASC, br.due_date ASC
         `;
-        // Urutkan berdasarkan username, lalu jatuh tempo untuk setiap user
 
         const [rows] = await db.execute(query);
         return rows;
