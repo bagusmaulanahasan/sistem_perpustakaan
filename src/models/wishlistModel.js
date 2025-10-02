@@ -77,6 +77,15 @@ const Wishlist = {
         const [rows] = await db.execute(query, params);
         return rows[0].total;
     },
+
+    // FUNGSI BARU: Cek apakah buku sudah ada di wishlist user
+    check: async (userId, bookId) => {
+        const [rows] = await db.execute(
+            "SELECT id FROM wishlists WHERE user_id = ? AND book_id = ? LIMIT 1",
+            [userId, bookId]
+        );
+        return rows.length > 0; // Return true jika ada, false jika tidak
+    },
 };
 
 module.exports = Wishlist;

@@ -1,5 +1,5 @@
-const db = require('../config/database');
-const Book = require('./bookModel'); // Impor Book model untuk akses increaseStoc
+const db = require("../config/database");
+const Book = require("./bookModel"); // Impor Book model untuk akses increaseStoc
 
 const Borrowing = {
     // Membuat catatan peminjaman baru
@@ -9,14 +9,20 @@ const Borrowing = {
         const dueDate = new Date();
         dueDate.setDate(borrowDate.getDate() + 14);
 
-        const sql = 'INSERT INTO borrowings (user_id, book_id, borrow_date, due_date) VALUES (?, ?, ?, ?)';
-        
+        const sql =
+            "INSERT INTO borrowings (user_id, book_id, borrow_date, due_date) VALUES (?, ?, ?, ?)";
+
         // Menggunakan koneksi yang di-passing untuk transaction
-        await (connection || db).execute(sql, [userId, bookId, borrowDate, dueDate]);
+        await (connection || db).execute(sql, [
+            userId,
+            bookId,
+            borrowDate,
+            dueDate,
+        ]);
     },
 
     // Menampilkan buku yang sedang dipinjam oleh user
-findActiveByUser: async (userId, options = {}) => {
+    findActiveByUser: async (userId, options = {}) => {
         const { searchTerm } = options;
         let query = `
             SELECT b.title, b.author, b.publisher, c.name AS category_name,
@@ -32,21 +38,43 @@ findActiveByUser: async (userId, options = {}) => {
             const likeTerm = `%${searchTerm}%`;
             const searchNumber = parseInt(searchTerm);
 
-            query += ` AND (`
+            query += ` AND (`;
             const searchConditions = [
-                `b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`,
-                `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.due_date) LIKE ?`
+                `b.title LIKE ?`,
+                `b.author LIKE ?`,
+                `b.publisher LIKE ?`,
+                `c.name LIKE ?`,
+                `MONTHNAME(br.borrow_date) LIKE ?`,
+                `MONTHNAME(br.due_date) LIKE ?`,
             ];
-            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            params.push(
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm
+            );
 
             if (!isNaN(searchNumber)) {
                 searchConditions.push(
-                    `DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`,
-                    `DAY(br.due_date) = ?`, `MONTH(br.due_date) = ?`, `YEAR(br.due_date) = ?`
+                    `DAY(br.borrow_date) = ?`,
+                    `MONTH(br.borrow_date) = ?`,
+                    `YEAR(br.borrow_date) = ?`,
+                    `DAY(br.due_date) = ?`,
+                    `MONTH(br.due_date) = ?`,
+                    `YEAR(br.due_date) = ?`
                 );
-                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+                params.push(
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber
+                );
             }
-            query += searchConditions.join(' OR ') + `)`;
+            query += searchConditions.join(" OR ") + `)`;
         }
 
         query += ` ORDER BY br.due_date ASC`;
@@ -71,28 +99,49 @@ findActiveByUser: async (userId, options = {}) => {
             const likeTerm = `%${searchTerm}%`;
             const searchNumber = parseInt(searchTerm);
 
-            query += ` AND (`
+            query += ` AND (`;
             const searchConditions = [
-                `b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`,
-                `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.return_date) LIKE ?`
+                `b.title LIKE ?`,
+                `b.author LIKE ?`,
+                `b.publisher LIKE ?`,
+                `c.name LIKE ?`,
+                `MONTHNAME(br.borrow_date) LIKE ?`,
+                `MONTHNAME(br.return_date) LIKE ?`,
             ];
-            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            params.push(
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm
+            );
 
             if (!isNaN(searchNumber)) {
                 searchConditions.push(
-                    `DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`,
-                    `DAY(br.return_date) = ?`, `MONTH(br.return_date) = ?`, `YEAR(br.return_date) = ?`
+                    `DAY(br.borrow_date) = ?`,
+                    `MONTH(br.borrow_date) = ?`,
+                    `YEAR(br.borrow_date) = ?`,
+                    `DAY(br.return_date) = ?`,
+                    `MONTH(br.return_date) = ?`,
+                    `YEAR(br.return_date) = ?`
                 );
-                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+                params.push(
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber
+                );
             }
-            query += searchConditions.join(' OR ') + `)`;
+            query += searchConditions.join(" OR ") + `)`;
         }
 
         query += ` ORDER BY br.return_date DESC`;
         const [rows] = await db.execute(query, params);
         return rows;
     },
-
 
     // FUNGSI BARU: Menampilkan semua buku yang sedang dipinjam (untuk admin) dengan filter pencarian
     findActiveWithSearch: async (searchTerm) => {
@@ -125,7 +174,14 @@ findActiveByUser: async (userId, options = {}) => {
                 c.name LIKE ?
             )`;
             const likeTerm = `%${searchTerm}%`;
-            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            params.push(
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm
+            );
         }
 
         query += ` ORDER BY br.due_date ASC`;
@@ -165,7 +221,14 @@ findActiveByUser: async (userId, options = {}) => {
                 c.name LIKE ?
             )`;
             const likeTerm = `%${searchTerm}%`;
-            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            params.push(
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm
+            );
         }
 
         query += ` ORDER BY br.return_date DESC`; // Urutkan berdasarkan tanggal kembali
@@ -174,7 +237,6 @@ findActiveByUser: async (userId, options = {}) => {
         return rows;
     },
 
-
     // FUNGSI BARU: Memproses pengembalian buku (dengan transaksi)
     processReturn: async (borrowingId) => {
         const connection = await db.getConnection();
@@ -182,14 +244,22 @@ findActiveByUser: async (userId, options = {}) => {
             await connection.beginTransaction();
 
             // 1. Dapatkan book_id dari borrowingId
-            const [borrowRows] = await connection.execute('SELECT book_id FROM borrowings WHERE id = ? AND return_date IS NULL', [borrowingId]);
+            const [borrowRows] = await connection.execute(
+                "SELECT book_id FROM borrowings WHERE id = ? AND return_date IS NULL",
+                [borrowingId]
+            );
             if (borrowRows.length === 0) {
-                throw new Error('Data peminjaman tidak ditemukan atau buku sudah dikembalikan.');
+                throw new Error(
+                    "Data peminjaman tidak ditemukan atau buku sudah dikembalikan."
+                );
             }
             const bookId = borrowRows[0].book_id;
 
             // 2. Update tanggal pengembalian di tabel borrowings
-            await connection.execute('UPDATE borrowings SET return_date = CURDATE() WHERE id = ?', [borrowingId]);
+            await connection.execute(
+                "UPDATE borrowings SET return_date = CURDATE() WHERE id = ?",
+                [borrowingId]
+            );
 
             // 3. Tambah stok buku di tabel books
             await Book.increaseStock(bookId, connection);
@@ -197,7 +267,6 @@ findActiveByUser: async (userId, options = {}) => {
             // 4. Jika semua berhasil, commit transaksi
             await connection.commit();
             return { success: true };
-
         } catch (error) {
             // 5. Jika ada error, batalkan semua perubahan
             await connection.rollback();
@@ -225,14 +294,42 @@ findActiveByUser: async (userId, options = {}) => {
             // ... (logika pencarian tanggal dan teks sama seperti findActiveByUser)
             const likeTerm = `%${searchTerm}%`;
             const searchNumber = parseInt(searchTerm);
-            query += ` AND (`
-            const searchConditions = [`b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`, `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.due_date) LIKE ?`];
-            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            query += ` AND (`;
+            const searchConditions = [
+                `b.title LIKE ?`,
+                `b.author LIKE ?`,
+                `b.publisher LIKE ?`,
+                `c.name LIKE ?`,
+                `MONTHNAME(br.borrow_date) LIKE ?`,
+                `MONTHNAME(br.due_date) LIKE ?`,
+            ];
+            params.push(
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm
+            );
             if (!isNaN(searchNumber)) {
-                searchConditions.push(`DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`, `DAY(br.due_date) = ?`, `MONTH(br.due_date) = ?`, `YEAR(br.due_date) = ?`);
-                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+                searchConditions.push(
+                    `DAY(br.borrow_date) = ?`,
+                    `MONTH(br.borrow_date) = ?`,
+                    `YEAR(br.borrow_date) = ?`,
+                    `DAY(br.due_date) = ?`,
+                    `MONTH(br.due_date) = ?`,
+                    `YEAR(br.due_date) = ?`
+                );
+                params.push(
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber
+                );
             }
-            query += searchConditions.join(' OR ') + `)`;
+            query += searchConditions.join(" OR ") + `)`;
         }
 
         const [rows] = await db.execute(query, params);
@@ -255,20 +352,56 @@ findActiveByUser: async (userId, options = {}) => {
             // ... (logika pencarian tanggal dan teks sama seperti findHistoryByUser)
             const likeTerm = `%${searchTerm}%`;
             const searchNumber = parseInt(searchTerm);
-            query += ` AND (`
-            const searchConditions = [`b.title LIKE ?`, `b.author LIKE ?`, `b.publisher LIKE ?`, `c.name LIKE ?`, `MONTHNAME(br.borrow_date) LIKE ?`, `MONTHNAME(br.return_date) LIKE ?`];
-            params.push(likeTerm, likeTerm, likeTerm, likeTerm, likeTerm, likeTerm);
+            query += ` AND (`;
+            const searchConditions = [
+                `b.title LIKE ?`,
+                `b.author LIKE ?`,
+                `b.publisher LIKE ?`,
+                `c.name LIKE ?`,
+                `MONTHNAME(br.borrow_date) LIKE ?`,
+                `MONTHNAME(br.return_date) LIKE ?`,
+            ];
+            params.push(
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm,
+                likeTerm
+            );
             if (!isNaN(searchNumber)) {
-                searchConditions.push(`DAY(br.borrow_date) = ?`, `MONTH(br.borrow_date) = ?`, `YEAR(br.borrow_date) = ?`, `DAY(br.return_date) = ?`, `MONTH(br.return_date) = ?`, `YEAR(br.return_date) = ?`);
-                params.push(searchNumber, searchNumber, searchNumber, searchNumber, searchNumber, searchNumber);
+                searchConditions.push(
+                    `DAY(br.borrow_date) = ?`,
+                    `MONTH(br.borrow_date) = ?`,
+                    `YEAR(br.borrow_date) = ?`,
+                    `DAY(br.return_date) = ?`,
+                    `MONTH(br.return_date) = ?`,
+                    `YEAR(br.return_date) = ?`
+                );
+                params.push(
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber,
+                    searchNumber
+                );
             }
-            query += searchConditions.join(' OR ') + `)`;
+            query += searchConditions.join(" OR ") + `)`;
         }
-        
+
         const [rows] = await db.execute(query, params);
         return rows[0].total;
     },
-};
 
+    // FUNGSI BARU: Cek apakah user sedang meminjam buku spesifik
+    isCurrentlyBorrowed: async (userId, bookId) => {
+        const [rows] = await db.execute(
+            "SELECT id FROM borrowings WHERE user_id = ? AND book_id = ? AND return_date IS NULL LIMIT 1",
+            [userId, bookId]
+        );
+        return rows.length > 0; // Return true jika sedang dipinjam, false jika tidak
+    },
+};
 
 module.exports = Borrowing;

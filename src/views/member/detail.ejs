@@ -40,34 +40,40 @@
             </div>
 
             <div class="mt-6 flex items-center space-x-4">
-                <% if (user && user.role === 'anggota') { %> <% if (book.stock >
-                0) { %>
-                <form action="/pinjam/<%= book.id %>" method="POST">
-                    <button
-                        type="submit"
-                        class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
-                    >
-                        Pinjam Buku
-                    </button>
-                </form>
-                <% } else { %>
-                <button
-                    class="px-6 py-3 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed"
-                    disabled
-                >
-                    Stok Habis
+    
+    <% if (user && user.role === 'anggota') { %>
+        
+        <% if (isBorrowed) { %>
+            <button class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg cursor-not-allowed" disabled>
+                Sedang Anda Pinjam
+            </button>
+        <% } else if (book.stock > 0) { %>
+            <form action="/pinjam/<%= book.id %>" method="POST">
+                <button type="submit" class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700">
+                    Pinjam Buku
                 </button>
-                <% } %>
-                <form action="/wishlist/tambah/<%= book.id %>" method="POST">
-                    <button
-                        type="submit"
-                        class="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
-                    >
-                        + Tambah ke Wishlist
-                    </button>
-                </form>
-                <% } %>
+            </form>
+        <% } else { %>
+            <button class="px-6 py-3 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed" disabled>
+                Stok Habis
+            </button>
+        <% } %>
+
+        <% if (isInWishlist) { %>
+            <div class="px-6 py-3 bg-pink-100 text-pink-700 font-semibold rounded-lg">
+                ♥ Sudah di Wishlist
             </div>
+        <% } else { %>
+            <form action="/wishlist/tambah/<%= book.id %>" method="POST">
+                <button type="submit" class="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300">
+                    + Tambah ke Wishlist
+                </button>
+            </form>
+        <% } %>
+
+    <% } %>
+    
+</div>
         </div>
     </div>
 </div>

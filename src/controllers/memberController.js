@@ -38,17 +38,28 @@ exports.showCatalog = async (req, res) => {
     }
 };
 
-// Menampilkan halaman detail satu buku
+// GANTI FUNGSI showBookDetail DENGAN INI
 exports.showBookDetail = async (req, res) => {
     try {
-        const book = await Book.findById(req.params.id);
+        const bookId = req.params.id;
+        const userId = req.session.user.id;
+
+        // Ambil data buku dan statusnya secara bersamaan untuk efisiensi
+        const [book, isInWishlist, isBorrowed] = await Promise.all([
+            Book.findById(bookId),
+            Wishlist.check(userId, bookId),
+            Borrowing.isCurrentlyBorrowed(userId, bookId)
+        ]);
+        
         if (!book) {
             return res.status(404).send('Buku tidak ditemukan');
         }
 
         res.render('member/detail', {
             title: book.title,
-            book
+            book,
+            isInWishlist, // Kirim status wishlist ke view
+            isBorrowed    // Kirim status peminjaman ke view
         });
     } catch (error) {
         console.error(error);
