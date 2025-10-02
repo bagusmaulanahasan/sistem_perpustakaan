@@ -35,55 +35,30 @@
         </div>
     </div>
 </div>
+
 <div class="mt-4 border-t pt-6">
     <label for="cover_image" class="block text-sm font-medium text-gray-700">Sampul Buku</label>
-    <input type="file" name="cover_image" id="cover_image" accept="image/*" required class="mt-1 block w-full text-sm text-gray-500
+    <input type="file" name="cover_image" id="cover_image" class="mt-1 block w-full text-sm text-gray-500
         file:mr-4 file:py-2 file:px-4
         file:rounded-full file:border-0
         file:text-sm file:font-semibold
         file:bg-indigo-50 file:text-indigo-700
         hover:file:bg-indigo-100"
     >
-    <p id="fileError" class="text-sm text-red-600 mt-1"></p>
-    
     <div class="mt-4">
-        <p class="text-xs text-gray-500 mb-2">Preview:</p>
-        <img id="imagePreview" src="<%= book && book.cover_image_url ? book.cover_image_url : '#' %>" alt="Preview Sampul" class="w-32 h-auto <%= book && book.cover_image_url ? '' : 'hidden' %> bg-gray-100 rounded shadow-sm">
+        <img id="imagePreview" src="<%= book && book.cover_image_url ? book.cover_image_url : '#' %>" alt="Preview Gambar" class="w-32 h-auto <%= book && book.cover_image_url ? '' : 'hidden' %> bg-gray-100 rounded shadow-sm">
     </div>
 </div>
 
 <script>
     const coverImageInput = document.getElementById('cover_image');
     const imagePreview = document.getElementById('imagePreview');
-    const fileError = document.getElementById('fileError');
 
     coverImageInput.addEventListener('change', function() {
-        // Bersihkan pesan error sebelumnya
-        fileError.textContent = '';
-
         const file = this.files[0];
         if (file) {
-            // Validasi Tipe File
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                fileError.textContent = 'Tipe file tidak valid. Harap pilih file gambar.';
-                this.value = ''; // Reset input file
-                imagePreview.classList.add('hidden');
-                return;
-            }
-
-            // Validasi Ukuran File (2MB)
-            const maxSizeInBytes = 2 * 1024 * 1024;
-            if (file.size > maxSizeInBytes) {
-                fileError.textContent = 'Ukuran file terlalu besar. Maksimal 2MB.';
-                this.value = ''; // Reset input file
-                imagePreview.classList.add('hidden');
-                return;
-            }
-
-            // Jika valid, tampilkan preview
             const reader = new FileReader();
-            imagePreview.classList.remove('hidden');
+            imagePreview.classList.remove('hidden'); // Tampilkan elemen img
             
             reader.addEventListener('load', function() {
                 imagePreview.setAttribute('src', this.result);
@@ -91,7 +66,7 @@
             
             reader.readAsDataURL(file);
         } else {
-            imagePreview.classList.add('hidden');
+            imagePreview.classList.add('hidden'); // Sembunyikan jika tidak ada file dipilih
             imagePreview.setAttribute('src', '#');
         }
     });

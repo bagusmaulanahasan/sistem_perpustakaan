@@ -57,7 +57,7 @@ exports.returnBook = async (req, res) => {
     }
 };
 
-// FUNGSI BARU UNTUK DOWNLOAD LAPORAN RIWAYAT SEBAGAI PDF
+// Fungsi untuk download laporan riwayat sebagai pdf
 exports.downloadHistoryPDF = async (req, res) => {
     try {
         // Panggil fungsi baru dari model yang mengurutkan berdasarkan nama
