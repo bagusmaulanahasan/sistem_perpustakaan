@@ -11,19 +11,39 @@ const Wishlist = {
         return result.affectedRows;
     },
 
-    // Menampilkan semua item di wishlist seorang user
-    findByUser: async (userId) => {
-        const [rows] = await db.execute(`
+    // GANTI FUNGSI findByUser YANG LAMA DENGAN INI
+    findByUser: async (userId, options = {}) => {
+        const { searchTerm } = options;
+
+        let query = `
             SELECT 
                 b.id,
                 b.title,
                 b.author,
-                b.cover_image_url
+                b.publisher,
+                b.cover_image_url,
+                c.name as category_name
             FROM wishlists w
             JOIN books b ON w.book_id = b.id
+            LEFT JOIN categories c ON b.category_id = c.id
             WHERE w.user_id = ?
-            ORDER BY w.created_at DESC
-        `, [userId]);
+        `;
+        const params = [userId];
+
+        if (searchTerm) {
+            query += ` AND (
+                b.title LIKE ? OR
+                b.author LIKE ? OR
+                b.publisher LIKE ? OR
+                c.name LIKE ?
+            )`;
+            const likeTerm = `%${searchTerm}%`;
+            params.push(likeTerm, likeTerm, likeTerm, likeTerm);
+        }
+
+        query += ` ORDER BY w.created_at DESC`;
+
+        const [rows] = await db.execute(query, params);
         return rows;
     },
 

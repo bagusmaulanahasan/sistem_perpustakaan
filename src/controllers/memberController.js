@@ -56,14 +56,19 @@ exports.showBookDetail = async (req, res) => {
     }
 };
 
-// Menampilkan halaman wishlist
+// GANTI FUNGSI showWishlist
 exports.showWishlist = async (req, res) => {
     try {
         const userId = req.session.user.id;
-        const books = await Wishlist.findByUser(userId);
+        const searchTerm = req.query.search || ''; // Ambil kata kunci dari URL
+
+        // Panggil model dengan opsi pencarian
+        const books = await Wishlist.findByUser(userId, { searchTerm });
+        
         res.render('member/wishlist', {
             title: 'Wishlist Saya',
-            books
+            books,
+            searchTerm // Kirim searchTerm ke view
         });
     } catch (error) {
         console.error(error);
