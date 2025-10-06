@@ -88,18 +88,30 @@ const Book = {
     },
 
     findAll: async (options = {}) => {
-        const { searchTerm } = options;
+        const { searchTerm, categoryId } = options;
         let query = `
         SELECT b.*, c.name AS category_name
         FROM books b
         LEFT JOIN categories c ON b.category_id = c.id
     `;
         const params = [];
+        const conditions = [];
 
         if (searchTerm) {
-            query += ` WHERE (b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ? OR c.name LIKE ?)`;
+            conditions.push(
+                `(b.title LIKE ? OR b.author LIKE ? OR b.publisher LIKE ? OR c.name LIKE ?)`
+            );
             const likeTerm = `%${searchTerm}%`;
             params.push(likeTerm, likeTerm, likeTerm, likeTerm);
+        }
+
+        if (categoryId) {
+            conditions.push(`b.category_id = ?`);
+            params.push(categoryId);
+        }
+
+        if (conditions.length > 0) {
+            query += ` WHERE ` + conditions.join(" AND ");
         }
 
         query += ` ORDER BY b.title ASC`;
