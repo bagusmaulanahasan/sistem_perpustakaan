@@ -12,13 +12,21 @@ exports.getRegisterPage = (req, res) => {
 exports.postRegister = async (req, res) => {
     try {
         const { username, email, password } = req.body;
-
+        
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
             return res.render("register", {
                 title: "Register",
                 layout: "./layouts/auth",
                 error: "Email sudah terdaftar.",
+            });
+        }
+
+        if (password.length < 6 || password.length > 100) {
+            return res.render("register", {
+                title: "Register",
+                layout: "./layouts/auth",
+                error: "Password harus memiliki 6 hingga 100 karakter.",
             });
         }
 
@@ -53,6 +61,15 @@ exports.getLoginPage = (req, res) => {
 exports.postLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // if (password.length < 6 || password.length > 100) {
+        //     return res.render("login", {
+        //         title: "Login",
+        //         layout: "./layouts/auth",
+        //         error: "Password harus memiliki 6 hingga 100 karakter.",
+        //         success: null,
+        //     });
+        // }
 
         const user = await User.findByEmail(email);
         if (!user) {
