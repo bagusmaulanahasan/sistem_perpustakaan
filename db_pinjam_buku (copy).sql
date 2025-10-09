@@ -37,7 +37,7 @@ CREATE TABLE `books` (
   `category_id` int DEFAULT NULL,
   `cover_image_url` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; -- DIUBAH DI SINI
 
 --
 -- Dumping data for table `books`
@@ -71,7 +71,7 @@ CREATE TABLE `borrowings` (
   `borrow_date` date NOT NULL,
   `due_date` date NOT NULL,
   `return_date` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; -- DIUBAH DI SINI
 
 --
 -- Dumping data for table `borrowings`
@@ -100,7 +100,7 @@ INSERT INTO `borrowings` (`id`, `user_id`, `book_id`, `borrow_date`, `due_date`,
 CREATE TABLE `categories` (
   `id` int NOT NULL,
   `name` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; -- DIUBAH DI SINI
 
 --
 -- Dumping data for table `categories`
@@ -124,10 +124,10 @@ CREATE TABLE `users` (
   `id` int NOT NULL,
   `username` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL, -- DIUBAH DI SINI
   `role` enum('admin','anggota') NOT NULL DEFAULT 'anggota',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; -- DIUBAH DI SINI
 
 --
 -- Dumping data for table `users`
@@ -151,7 +151,7 @@ CREATE TABLE `wishlists` (
   `user_id` int NOT NULL,
   `book_id` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; -- DIUBAH DI SINI
 
 --
 -- Dumping data for table `wishlists`
