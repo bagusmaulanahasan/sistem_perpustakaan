@@ -10,12 +10,13 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         />
     </head>
+    <script></script>
     <body class="bg-gray-100">
         <div class="none md:flex h-screen">
             <aside class="w-64 bg-gray-800 text-white flex-shrink-0">
                 <div class="p-4 text-2xl font-bold flex items-center gap-2">
                     <img
-                        src="logo-perpuslan.png"
+                        src="/logo-perpuslan.png"
                         alt=""
                         class="w-12 h-12 rounded-full"
                     />
@@ -30,28 +31,28 @@
                     </h3>
                     <a
                         href="/katalog"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded <%= title == 'Katalog Buku' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-book mr-2"></i> Katalog Buku</a
                     >
                     <a
                         href="/admin/books"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded <%= title == 'Manajemen Buku' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-database mr-2"></i> Data Buku</a
                     >
                     <a
                         href="/admin/categories"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded <%= title == 'Manajemen Kategori' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-tags mr-2"></i> Data Kategori</a
                     >
                     <a
                         href="/admin/borrowings"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded <%= title == 'Buku Sedang Dipinjam' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-book-open-reader mr-2"></i> Sedang
                         Dipinjam</a
                     >
                     <a
                         href="/admin/history"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 <%= title == 'Riwayat Peminjaman' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-clock-rotate-left mr-2"></i> Riwayat
                         Peminjaman</a
                     >
@@ -63,29 +64,29 @@
                     </h3>
                     <a
                         href="/katalog"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded <%= title == 'Katalog Buku' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-book mr-2"></i> Katalog Buku</a
                     >
                     <a
                         href="/wishlist"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded <%= title == 'Wishlist Saya' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-heart mr-2"></i> Wishlist</a
                     >
                     <a
                         href="/dipinjam"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded  <%= title == 'Buku yang Sedang Dipinjam' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-book-reader mr-2"></i> Buku
                         Dipinjam</a
                     >
                     <a
                         href="/riwayat"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded <%= title == 'Riwayat Peminjaman' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-clock-rotate-left mr-2"></i> Riwayat
                         Pinjaman</a
                     >
                     <a
                         href="/profil"
-                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded border-t border-gray-700 pt-4"
+                        class="block px-4 py-2 mt-2 text-sm hover:bg-gray-700 rounded border-t border-gray-700 pt-4  <%= title == 'Profil Saya' ? 'bg-gray-700' : '' %>"
                         ><i class="fas fa-user mr-2"></i> Profil Saya</a
                     >
                     <% } %>
