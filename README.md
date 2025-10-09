@@ -15,7 +15,7 @@ Sistem Perpustakaan adalah sebuah aplikasi perpustakaan yang dibuat menggunakan 
 
 ## Cara Menjalankan Project
 
-1. Clone repository dengan perintah: 
+1. Download ZIP repository atau langsung clone repository *(jika sudah install git)* dengan perintah:
 ```bash
 git clone https://github.com/bagusmaulanahasan/sistem_perpustakaan
 ```
