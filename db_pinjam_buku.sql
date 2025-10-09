@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 02, 2025 at 08:34 AM
+-- Generation Time: Oct 09, 2025 at 07:34 AM
 -- Server version: 8.0.42-0ubuntu0.24.04.2
 -- PHP Version: 8.3.6
 
@@ -45,17 +45,18 @@ CREATE TABLE `books` (
 
 INSERT INTO `books` (`id`, `title`, `author`, `publisher`, `publication_year`, `stock`, `category_id`, `cover_image_url`, `created_at`) VALUES
 (1, 'Petualangan di Dunia Fantasi', 'Rina Wulandari', 'Gramedia', '2020', 9, 1, '/uploads/covers/cover_image-1759306877151-131979542.jpg', '2025-09-29 09:59:43'),
-(2, 'Belajar Python untuk Pemula', 'Andi Nugroho', 'Informatika Press', '2022', 9, 3, '/uploads/covers/cover_image-1759372504755-877040319.jpeg', '2025-09-29 09:59:43'),
+(2, 'Belajar Python untuk Pemula', 'Andi Nugroho', 'Informatika Press', '2022', 11, 3, '/uploads/covers/cover_image-1759398147713-433681563.jpeg', '2025-09-29 09:59:43'),
 (3, 'Sejarah Nusantara', 'Dewi Kartika', 'Kompas', '2018', 7, 4, '/uploads/covers/cover_image-1759372424570-471149537.jpg', '2025-09-29 09:59:43'),
 (4, 'Psikologi Anak Modern', 'Dr. Siti Aminah', 'Mizan', '2021', 3, 2, '/uploads/covers/cover_image-1759372391161-967245093.png', '2025-09-29 09:59:43'),
 (5, 'Dongeng Horror Sebelum Tidur', 'Tono Prasetyo', 'Tiga Serangkai', '2018', 15, 5, '/uploads/covers/cover_image-1759307371890-369389190.png', '2025-09-29 09:59:43'),
 (6, 'Tips & Trik Bertahan Hidup di Universitas Pamulang', 'NotNeverMan', 'PerpusUnpam', '2024', 7, 4, '/uploads/covers/cover_image-1759306754037-52500730.png', '2025-10-01 08:05:21'),
 (7, 'Petualangan Si Kancil', 'R. A. Kosasih', 'Gramedia Kids', '2018', 14, 1, '/uploads/covers/cover_image-1759372336946-287319436.jpg', '2025-10-01 10:33:51'),
-(10, 'Dunia Tanpa Batas', 'Mira Lesmana', 'Bentang Pustaka', '2021', 10, 3, '/uploads/covers/cover_image-1759372230641-18385117.jpg', '2025-10-01 10:33:51'),
+(10, 'Dunia Tanpa Batas', 'Mira Lesmana', 'Bentang Pustaka', '2021', 9, 3, '/uploads/covers/cover_image-1759372230641-18385117.jpg', '2025-10-01 10:33:51'),
 (11, 'Fakta Menakjubkan Tentang Otak', 'Prof. Nina Kartika', 'IlmuPopuler', '2019', 7, 2, '/uploads/covers/cover_image-1759372283264-321657569.jpg', '2025-10-01 10:33:51'),
 (12, 'Robot dan Anak Ajaib', 'T. Arief Pratama', 'AnakCerdas', '2023', 13, 1, '/uploads/covers/cover_image-1759360779846-605071448.jpeg', '2025-10-01 10:33:51'),
 (13, 'Keindahan dalam sebuah Furniture', 'Lowsen Hayne', 'FurMaz', '2014', 8, 2, '/uploads/covers/cover_image-1759360829672-792749098.jpg', '2025-10-01 23:20:29'),
-(14, 'The King Savannah', 'Drawd Edersoon', 'AnimalFams', '1978', 11, 2, '/uploads/covers/cover_image-1759392896204-380041856.jpg', '2025-10-02 08:14:56');
+(14, 'The King Savannah', 'Drawd Edersoon', 'AnimalFams', '1978', 11, 2, '/uploads/covers/cover_image-1759392896204-380041856.jpg', '2025-10-02 08:14:56'),
+(15, 'Sejarah Terbentuknya Amazon', 'Darwin Stelbert', 'Floridasx', '2004', 7, 4, '/uploads/covers/cover_image-1759397725975-527797301.webp', '2025-10-02 09:35:25');
 
 -- --------------------------------------------------------
 
@@ -87,7 +88,8 @@ INSERT INTO `borrowings` (`id`, `user_id`, `book_id`, `borrow_date`, `due_date`,
 (10, 5, 12, '2025-10-02', '2025-10-16', '2025-10-02'),
 (11, 5, 3, '2025-10-02', '2025-10-16', '2025-10-02'),
 (12, 5, 11, '2025-10-02', '2025-10-16', '2025-10-02'),
-(13, 5, 10, '2025-10-02', '2025-10-16', NULL);
+(13, 5, 10, '2025-10-02', '2025-10-16', NULL),
+(14, 1, 10, '2025-10-02', '2025-10-16', NULL);
 
 -- --------------------------------------------------------
 
@@ -107,8 +109,8 @@ CREATE TABLE `categories` (
 INSERT INTO `categories` (`id`, `name`) VALUES
 (5, 'Anak-anak'),
 (1, 'Fiksi'),
-(6, 'Matematika'),
 (2, 'Non-Fiksi'),
+(7, 'Pertanian'),
 (4, 'Sejarah'),
 (3, 'Teknologi');
 
@@ -122,7 +124,7 @@ CREATE TABLE `users` (
   `id` int NOT NULL,
   `username` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `role` enum('admin','anggota') NOT NULL DEFAULT 'anggota',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -167,7 +169,8 @@ INSERT INTO `wishlists` (`id`, `user_id`, `book_id`, `created_at`) VALUES
 (17, 4, 14, '2025-10-02 08:30:40'),
 (18, 5, 2, '2025-10-02 08:31:42'),
 (19, 5, 6, '2025-10-02 08:31:47'),
-(21, 5, 10, '2025-10-02 08:32:39');
+(21, 5, 10, '2025-10-02 08:32:39'),
+(22, 1, 10, '2025-10-02 09:42:47');
 
 --
 -- Indexes for dumped tables
@@ -218,19 +221,19 @@ ALTER TABLE `wishlists`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `borrowings`
 --
 ALTER TABLE `borrowings`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -242,7 +245,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `wishlists`
 --
 ALTER TABLE `wishlists`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Constraints for dumped tables

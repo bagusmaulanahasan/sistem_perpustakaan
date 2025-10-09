@@ -1,16 +1,22 @@
 <div class="bg-white p-6 rounded-lg shadow-md">
-
-<div class="flex justify-between items-center mb-4">
-    <h1 class="text-2xl font-bold text-gray-800">Daftar Buku</h1>
-    <div class="flex space-x-2">
-        <a href="/admin/books/download" target="_blank" class="px-4 py-2 text-base font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-            <i class="fas fa-download mr-2"></i> Download Laporan
-        </a>
-        <a href="/admin/books/new" class="px-4 py-2 text-base font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <i class="fas fa-plus mr-2"></i> Tambah Buku
-        </a>
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Daftar Buku</h1>
+        <div class="flex space-x-2">
+            <a
+                href="/admin/books/download"
+                target="_blank"
+                class="px-4 py-2 text-base font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+                <i class="fas fa-download mr-2"></i> Download Laporan
+            </a>
+            <a
+                href="/admin/books/new"
+                class="px-4 py-2 text-base font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+                <i class="fas fa-plus mr-2"></i> Tambah Buku
+            </a>
+        </div>
     </div>
-</div>
 
     <!-- <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-semibold text-gray-800">Daftar Buku</h2>
@@ -19,21 +25,35 @@
         </a>
     </div> -->
 
-        <form method="GET" action="/admin/books" class="mb-4">
+    <form method="GET" action="/admin/books" class="mb-4">
         <div class="flex">
-            <input type="text" name="search" value="<%= searchTerm %>" placeholder="Cari judul, penulis, atau penerbit..." class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700">Cari</button>
+            <input
+                type="text"
+                name="search"
+                value="<%= searchTerm %>"
+                placeholder="Cari judul, penulis, atau penerbit..."
+                required
+                class="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <button
+                type="submit"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700"
+            >
+                Cari
+            </button>
         </div>
     </form>
 
     <div class="mb-4 text-sm text-gray-600">
-        Menampilkan <strong><%= count %></strong> data buku.
-        <% if (searchTerm) { %>
-            <span>untuk kata kunci "<%= searchTerm %>"</span>
-            <a href="/admin/books" class="text-indigo-600 hover:underline ml-2">[Reset]</a>
+        Menampilkan <strong><%= count %></strong> data buku. <% if (searchTerm)
+        { %>
+        <span>untuk kata kunci "<%= searchTerm %>"</span>
+        <a href="/admin/books" class="text-indigo-600 hover:underline ml-2"
+            >[Reset]</a
+        >
         <% } %>
     </div>
-    
+
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white">
             <thead class="bg-gray-200">
@@ -48,19 +68,39 @@
             </thead>
             <tbody>
                 <% books.forEach(book => { %>
-                    <tr class="border-b">
-                        <td class="py-2 px-4 font-medium"><%= book.title %></td>
-                        <td class="py-2 px-4 text-gray-600"><%= book.author %></td>
-                        <td class="py-2 px-4 text-gray-600"><%= book.publisher %></td>
-                        <td class="py-2 px-4"><span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded"><%= book.category_name || 'Tanpa Kategori' %></span></td>
-                        <td class="py-2 px-4 text-center"><%= book.stock %></td>
-                        <td class="py-2 px-4 flex items-center space-x-2">
-                            <a href="/admin/books/edit/<%= book.id %>" class="bg-green-100 text-green-700 px-4 py-1 hover:bg-green-200 rounded">Edit</a>
-                            <form action="/admin/books/delete/<%= book.id %>" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus buku ini?');">
-                                <button type="submit" class="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-1 rounded">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
+                <tr class="border-b">
+                    <td class="py-2 px-4 font-medium"><%= book.title %></td>
+                    <td class="py-2 px-4 text-gray-600"><%= book.author %></td>
+                    <td class="py-2 px-4 text-gray-600">
+                        <%= book.publisher %>
+                    </td>
+                    <td class="py-2 px-4">
+                        <span
+                            class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                            ><%= book.category_name || 'Tanpa Kategori' %></span
+                        >
+                    </td>
+                    <td class="py-2 px-4 text-center"><%= book.stock %></td>
+                    <td class="py-2 px-4 flex items-center space-x-2">
+                        <a
+                            href="/admin/books/edit/<%= book.id %>"
+                            class="bg-green-100 text-green-700 px-4 py-1 hover:bg-green-200 rounded"
+                            >Edit</a
+                        >
+                        <form
+                            action="/admin/books/delete/<%= book.id %>"
+                            method="POST"
+                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus buku ini?');"
+                        >
+                            <button
+                                type="submit"
+                                class="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-1 rounded"
+                            >
+                                Hapus
+                            </button>
+                        </form>
+                    </td>
+                </tr>
                 <% }) %>
             </tbody>
         </table>
