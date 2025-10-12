@@ -42,9 +42,6 @@ app.use("/admin/books", bookRoutes);
 app.use("/", memberRoutes);
 app.use("/admin", adminRoutes);
 
-app.get("/", (req, res) => {
-    res.redirect("/login");
-});
 
 app.get("/", (req, res) => {
     if (req.session.isLoggedIn) {
